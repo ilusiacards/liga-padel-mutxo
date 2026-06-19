@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Liga Padel Mutxo</title>
+<title>Liga Mutxo Padel</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="app-header">
-    <h1>Liga Padel Mutxo</h1>
+    <h1>Liga Mutxo Padel</h1>
     <nav class="tab-nav" id="tab-nav">
       <button class="tab-btn active" data-tab="jugadores">Jugadores</button>
       <button class="tab-btn" data-tab="jornadas">Jornadas</button>
@@ -32,8 +32,8 @@
         <button id="btn-generar-liga" class="btn btn-primary">Generar Liga</button>
       </div>
       <div class="acciones-datos">
-        <button id="btn-exportar" class="btn btn-secondary">Exportar JSON</button>
-        <label class="btn btn-secondary" for="input-importar">Importar JSON</label>
+        <button id="btn-exportar" class="btn btn-secondary">Exportar Datos</button>
+        <label class="btn btn-secondary" for="input-importar">Importar Datos</label>
         <input type="file" id="input-importar" accept=".json" hidden />
       </div>
     </section>
@@ -44,7 +44,10 @@
     </section>
 
     <section id="tab-clasificacion" class="tab-section">
-      <div class="tabla-wrapper">
+      <div class="acciones-clasificacion">
+        <button id="btn-imagen-clasificacion" class="btn btn-secondary">Sacar imagen</button>
+      </div>
+      <div class="tabla-wrapper" id="clasificacion-capturable">
         <table class="tabla-clasificacion">
           <thead>
             <tr>
@@ -75,6 +78,7 @@
     </div>
   </div>
 
+  <script src="vendor/html2canvas.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

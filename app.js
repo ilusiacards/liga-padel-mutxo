@@ -304,8 +304,28 @@ function renderJornadas() {
 
     const header = document.createElement('div');
     header.className = 'jornada-header';
-    header.innerHTML = `<h3>Jornada ${jornada.numero}</h3><span class="jornada-toggle">▾</span>`;
-    header.addEventListener('click', () => {
+    header.innerHTML = `<h3>Jornada ${jornada.numero}</h3>`;
+
+    const btnImagen = document.createElement('button');
+    btnImagen.className = 'btn btn-small btn-imagen no-captura';
+    btnImagen.textContent = 'Sacar imagen';
+    btnImagen.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const estabaColapsada = jornada.colapsada;
+      if (estabaColapsada) card.classList.remove('colapsada');
+      capturarImagen(card, `jornada-${jornada.numero}-padel-mutxo`).finally(() => {
+        if (estabaColapsada) card.classList.add('colapsada');
+      });
+    });
+    header.appendChild(btnImagen);
+
+    const toggle = document.createElement('span');
+    toggle.className = 'jornada-toggle';
+    toggle.textContent = '▾';
+    header.appendChild(toggle);
+
+    header.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-imagen')) return;
       jornada.colapsada = !jornada.colapsada;
       guardarEstado();
       renderJornadas();
@@ -483,6 +503,33 @@ function generarLiga() {
   }
 }
 
+/* ============================================================
+   SACAR IMAGEN (captura de DOM a PNG descargable)
+   ============================================================ */
+
+function capturarImagen(elemento, nombreArchivo) {
+  return html2canvas(elemento, {
+    backgroundColor: '#0a0e1a',
+    scale: 2,
+    ignoreElements: (el) => el.classList && el.classList.contains('no-captura'),
+  }).then((canvas) => {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${nombreArchivo}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        resolve();
+      }, 'image/png');
+    });
+  }).catch((err) => {
+    console.error('Error al generar la imagen', err);
+    alert('No se ha podido generar la imagen.');
+  });
+}
+
 function exportarJSON() {
   const fecha = new Date().toISOString().slice(0, 10);
   const blob = new Blob([JSON.stringify(ligaState, null, 2)], { type: 'application/json' });
@@ -543,6 +590,10 @@ function init() {
 
   document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
   document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
+  document.getElementById('btn-imagen-clasificacion').addEventListener('click', () => {
+    const fecha = new Date().toISOString().slice(0, 10);
+    capturarImagen(document.getElementById('clasificacion-capturable'), `clasificacion-padel-mutxo-${fecha}`);
+  });
   document.getElementById('input-importar').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) importarJSON(file);

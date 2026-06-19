@@ -1,4 +1,4 @@
-# Liga Padel Mutxo
+# Liga Mutxo Padel
 
 App web 100% estática (sin framework, sin build, sin backend) para gestionar la liga de pádel mixto entre "Mutxo Girls" y "Mutxo Boys".
 
@@ -20,10 +20,16 @@ En la pestaña **Jornadas**, despliega cada jornada y rellena los sets (0-7 jueg
 
 La pestaña **Clasificación** se recalcula automáticamente con cada resultado introducido: puntos (victoria 3, derrota 1), sets y juegos ganados/perdidos, con desempate por enfrentamiento directo y, en última instancia, alfabético.
 
+## Sacar imagen (compartir por WhatsApp o email)
+
+- En la pestaña **Jornadas**, cada jornada tiene un botón **Sacar imagen** que genera una foto (PNG) de esa jornada con todos sus partidos y resultados.
+- En la pestaña **Clasificación**, el botón **Sacar imagen** genera una foto de la tabla completa.
+- Al pulsarlo se descarga el archivo PNG (el navegador pedirá dónde guardarlo, según su configuración). Desde ahí puedes adjuntarlo en WhatsApp, email, etc.
+
 ## Exportar / Importar (compartir entre dispositivos)
 
-- **Exportar JSON**: descarga un archivo `liga-padel-mutxo-{fecha}.json` con todo el estado de la liga.
-- **Importar JSON**: en otro dispositivo o navegador, usa este botón para cargar el archivo exportado y continuar con los mismos datos. Se pedirá confirmación antes de sobrescribir los datos actuales.
+- **Exportar Datos**: descarga un archivo `liga-padel-mutxo-{fecha}.json` con todo el estado de la liga.
+- **Importar Datos**: en otro dispositivo o navegador, usa este botón para cargar el archivo exportado y continuar con los mismos datos. Se pedirá confirmación antes de sobrescribir los datos actuales.
 
 ## Reiniciar desde cero
 
