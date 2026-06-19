@@ -1,0 +1,387 @@
+:root {
+  --bg: #0a0e1a;
+  --surface: #11172a;
+  --surface-elevada: #161d36;
+  --primary: #e8973a;
+  --secondary: #7ec8e3;
+  --text: #f5f7fa;
+  --muted: #8b93a7;
+  --destructive: #e35d5d;
+  --success: #5cc28a;
+
+  --radius-card: 12px;
+  --radius-input: 8px;
+  --radius-pill: 9999px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
+
+.app-header {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+}
+
+.tab-nav {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.tab-btn {
+  background: var(--surface);
+  color: var(--muted);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms, color 180ms;
+}
+
+.tab-btn:hover { background: var(--surface-elevada); }
+
+.tab-btn.active {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+.app-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-2);
+}
+
+.tab-section { display: none; }
+.tab-section.active { display: block; }
+
+.jugadores-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.columna-jugadores {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+}
+
+.inputs-jugadores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.input-jugador {
+  background: var(--surface-elevada);
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 180ms;
+}
+
+.input-jugador::placeholder { color: var(--muted); }
+
+.input-jugador:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+.acciones-jugadores {
+  margin-top: var(--space-3);
+  text-align: center;
+}
+
+.acciones-datos {
+  margin-top: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 180ms, transform 150ms;
+  display: inline-block;
+}
+
+.btn:hover { filter: brightness(1.1); }
+.btn:active { transform: scale(0.98); }
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--bg);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+.btn-destructive {
+  background: var(--destructive);
+  color: var(--text);
+}
+
+.btn-small {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+}
+
+.mensaje-vacio {
+  color: var(--muted);
+  text-align: center;
+  margin-top: var(--space-4);
+}
+
+/* Jornadas */
+.jornada-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  margin-bottom: var(--space-2);
+  overflow: hidden;
+}
+
+.jornada-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.jornada-header h3 { font-size: 1.1rem; }
+
+.jornada-toggle {
+  color: var(--muted);
+  font-size: 1.2rem;
+  transition: transform 180ms;
+}
+
+.jornada-card.colapsada .jornada-toggle { transform: rotate(-90deg); }
+
+.jornada-partidos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.jornada-card.colapsada .jornada-partidos { display: none; }
+
+.partido-card {
+  background: var(--surface-elevada);
+  border-radius: var(--radius-card);
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  transition: border-color 180ms;
+}
+
+.partido-card.completado {
+  border-color: var(--success);
+}
+
+.partido-parejas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.pareja {
+  flex: 1;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px;
+  border-radius: var(--radius-input);
+}
+
+.pareja-a { background: rgba(232, 151, 58, 0.15); color: var(--primary); }
+.pareja-b { background: rgba(126, 200, 227, 0.15); color: var(--secondary); }
+
+.pareja.ganadora {
+  box-shadow: 0 0 0 2px var(--success);
+}
+
+.vs-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: var(--space-2);
+}
+
+.set-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.set-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.input-set {
+  width: 100%;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius-input);
+  color: var(--text);
+  padding: 6px 4px;
+  font-size: 0.95rem;
+}
+
+.input-set:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+.input-set.invalido {
+  border-color: var(--destructive);
+}
+
+.partido-acciones {
+  text-align: center;
+}
+
+.btn-completar {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+.btn-completar.completado {
+  background: var(--success);
+}
+
+/* Clasificación */
+.tabla-wrapper { overflow-x: auto; }
+
+.tabla-clasificacion {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tabla-clasificacion th,
+.tabla-clasificacion td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--surface-elevada);
+}
+
+.tabla-clasificacion th {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.tabla-clasificacion td:nth-child(2) {
+  text-align: left;
+  font-weight: 600;
+}
+
+.col-puntos {
+  background: rgba(232, 151, 58, 0.12);
+}
+
+.tabla-clasificacion td.col-puntos {
+  background: rgba(232, 151, 58, 0.12);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  max-width: 400px;
+  width: 90%;
+}
+
+.modal-acciones {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .jornada-partidos {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .jugadores-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-datos {
+    flex-direction: column;
+  }
+
+  h1 { font-size: 1.4rem; }
+}

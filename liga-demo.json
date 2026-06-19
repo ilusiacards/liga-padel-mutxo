@@ -1,0 +1,937 @@
+{
+  "girls": [
+    "Ana",
+    "Marta",
+    "Lucia",
+    "Sofia",
+    "Elena",
+    "Paula",
+    "Laura",
+    "Irene"
+  ],
+  "boys": [
+    "Pedro",
+    "Juan",
+    "Carlos",
+    "Diego",
+    "Pablo",
+    "Mario",
+    "Sergio",
+    "Raul"
+  ],
+  "liveGenerated": true,
+  "jornadas": [
+    {
+      "numero": 1,
+      "partidos": [
+        {
+          "id": "j1-p1",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 3
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 0
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j1-p2",
+          "parejaA": {
+            "girlIdx": 1,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 6,
+            "boyIdx": 2
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 4
+            },
+            {
+              "a": 6,
+              "b": 4
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j1-p3",
+          "parejaA": {
+            "girlIdx": 0,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 2,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j1-p4",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 1
+          },
+          "parejaB": {
+            "girlIdx": 3,
+            "boyIdx": 7
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 2,
+      "partidos": [
+        {
+          "id": "j2-p1",
+          "parejaA": {
+            "girlIdx": 2,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 0,
+            "boyIdx": 0
+          },
+          "sets": [
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 6,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j2-p2",
+          "parejaA": {
+            "girlIdx": 1,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 2
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j2-p3",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 1
+          },
+          "parejaB": {
+            "girlIdx": 6,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 0,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j2-p4",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 7
+          },
+          "parejaB": {
+            "girlIdx": 3,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": null
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 3,
+      "partidos": [
+        {
+          "id": "j3-p1",
+          "parejaA": {
+            "girlIdx": 2,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 0,
+            "boyIdx": 2
+          },
+          "sets": [
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j3-p2",
+          "parejaA": {
+            "girlIdx": 1,
+            "boyIdx": 0
+          },
+          "parejaB": {
+            "girlIdx": 4,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 0,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": null
+        },
+        {
+          "id": "j3-p3",
+          "parejaA": {
+            "girlIdx": 6,
+            "boyIdx": 1
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j3-p4",
+          "parejaA": {
+            "girlIdx": 3,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 5,
+            "boyIdx": 7
+          },
+          "sets": [
+            {
+              "a": 0,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 2,
+              "b": 6
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 4,
+      "partidos": [
+        {
+          "id": "j4-p1",
+          "parejaA": {
+            "girlIdx": 2,
+            "boyIdx": 0
+          },
+          "parejaB": {
+            "girlIdx": 0,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j4-p2",
+          "parejaA": {
+            "girlIdx": 3,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 1,
+            "boyIdx": 2
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 4,
+              "b": 6
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j4-p3",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 1
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 1
+            },
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": null
+        },
+        {
+          "id": "j4-p4",
+          "parejaA": {
+            "girlIdx": 6,
+            "boyIdx": 7
+          },
+          "parejaB": {
+            "girlIdx": 5,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 5,
+      "partidos": [
+        {
+          "id": "j5-p1",
+          "parejaA": {
+            "girlIdx": 3,
+            "boyIdx": 0
+          },
+          "parejaB": {
+            "girlIdx": 6,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j5-p2",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 1,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 3,
+              "b": 6
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j5-p3",
+          "parejaA": {
+            "girlIdx": 2,
+            "boyIdx": 2
+          },
+          "parejaB": {
+            "girlIdx": 0,
+            "boyIdx": 1
+          },
+          "sets": [
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 1
+            },
+            {
+              "a": 6,
+              "b": 1
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j5-p4",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 7
+          },
+          "sets": [
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 1,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 6,
+      "partidos": [
+        {
+          "id": "j6-p1",
+          "parejaA": {
+            "girlIdx": 0,
+            "boyIdx": 7
+          },
+          "parejaB": {
+            "girlIdx": 2,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 0,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 1
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j6-p2",
+          "parejaA": {
+            "girlIdx": 6,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j6-p3",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 5
+          },
+          "parejaB": {
+            "girlIdx": 4,
+            "boyIdx": 0
+          },
+          "sets": [
+            {
+              "a": 2,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 2,
+              "b": 6
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j6-p4",
+          "parejaA": {
+            "girlIdx": 1,
+            "boyIdx": 1
+          },
+          "parejaB": {
+            "girlIdx": 3,
+            "boyIdx": 2
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 7,
+      "partidos": [
+        {
+          "id": "j7-p1",
+          "parejaA": {
+            "girlIdx": 0,
+            "boyIdx": 4
+          },
+          "parejaB": {
+            "girlIdx": 1,
+            "boyIdx": 7
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j7-p2",
+          "parejaA": {
+            "girlIdx": 7,
+            "boyIdx": 6
+          },
+          "parejaB": {
+            "girlIdx": 6,
+            "boyIdx": 5
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 3
+            },
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 6,
+              "b": 2
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j7-p3",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 2
+          },
+          "parejaB": {
+            "girlIdx": 3,
+            "boyIdx": 3
+          },
+          "sets": [
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j7-p4",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 0
+          },
+          "parejaB": {
+            "girlIdx": 2,
+            "boyIdx": 1
+          },
+          "sets": [
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 4,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        }
+      ],
+      "colapsada": false
+    },
+    {
+      "numero": 8,
+      "partidos": [
+        {
+          "id": "j8-p1",
+          "parejaA": {
+            "girlIdx": 3,
+            "boyIdx": 1
+          },
+          "parejaB": {
+            "girlIdx": 1,
+            "boyIdx": 4
+          },
+          "sets": [
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 3,
+              "b": 6
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "B"
+        },
+        {
+          "id": "j8-p2",
+          "parejaA": {
+            "girlIdx": 4,
+            "boyIdx": 3
+          },
+          "parejaB": {
+            "girlIdx": 6,
+            "boyIdx": 0
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 1
+            },
+            {
+              "a": 6,
+              "b": 1
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j8-p3",
+          "parejaA": {
+            "girlIdx": 2,
+            "boyIdx": 7
+          },
+          "parejaB": {
+            "girlIdx": 7,
+            "boyIdx": 5
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 6,
+              "b": 2
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        },
+        {
+          "id": "j8-p4",
+          "parejaA": {
+            "girlIdx": 5,
+            "boyIdx": 2
+          },
+          "parejaB": {
+            "girlIdx": 0,
+            "boyIdx": 6
+          },
+          "sets": [
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 6,
+              "b": 0
+            },
+            {
+              "a": 0,
+              "b": 0
+            }
+          ],
+          "completado": true,
+          "ganadorPareja": "A"
+        }
+      ],
+      "colapsada": false
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Liga Padel Mutxo</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Liga Padel Mutxo</h1>
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="jugadores">Jugadores</button>
+      <button class="tab-btn" data-tab="jornadas">Jornadas</button>
+      <button class="tab-btn" data-tab="clasificacion">Clasificación</button>
+    </nav>
+  </header>
+
+  <main class="app-main">
+    <section id="tab-jugadores" class="tab-section active">
+      <div class="jugadores-columnas">
+        <div class="columna-jugadores" id="columna-girls">
+          <h2>Mutxo Girls</h2>
+          <div class="inputs-jugadores" id="inputs-girls"></div>
+        </div>
+        <div class="columna-jugadores" id="columna-boys">
+          <h2>Mutxo Boys</h2>
+          <div class="inputs-jugadores" id="inputs-boys"></div>
+        </div>
+      </div>
+      <div class="acciones-jugadores">
+        <button id="btn-generar-liga" class="btn btn-primary">Generar Liga</button>
+      </div>
+      <div class="acciones-datos">
+        <button id="btn-exportar" class="btn btn-secondary">Exportar JSON</button>
+        <label class="btn btn-secondary" for="input-importar">Importar JSON</label>
+        <input type="file" id="input-importar" accept=".json" hidden />
+      </div>
+    </section>
+
+    <section id="tab-jornadas" class="tab-section">
+      <div id="jornadas-container"></div>
+      <p id="jornadas-vacio" class="mensaje-vacio">Aún no se ha generado ninguna liga. Ve a la pestaña "Jugadores" y pulsa "Generar Liga".</p>
+    </section>
+
+    <section id="tab-clasificacion" class="tab-section">
+      <div class="tabla-wrapper">
+        <table class="tabla-clasificacion">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Jugador</th>
+              <th>PJ</th>
+              <th>PG</th>
+              <th>Sets G</th>
+              <th>Sets P</th>
+              <th>Jueg G</th>
+              <th>Jueg P</th>
+              <th class="col-puntos">Puntos</th>
+            </tr>
+          </thead>
+          <tbody id="clasificacion-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <p id="modal-mensaje"></p>
+      <div class="modal-acciones">
+        <button id="modal-cancelar" class="btn btn-secondary">Cancelar</button>
+        <button id="modal-confirmar" class="btn btn-destructive">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
