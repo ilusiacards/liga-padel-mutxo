@@ -212,38 +212,55 @@ function calcularClasificacion() {
   return Object.values(stats);
 }
 
-function enfrentamientoDirecto(idJugadorA, idJugadorB) {
-  let victoriasA = 0;
-  let victoriasB = 0;
+function victoriasEnGrupo(idJugador, idsGrupo) {
+  let victorias = 0;
   for (const partido of partidosCompletados()) {
     const idsA = personasDePareja(partido.parejaA);
     const idsB = personasDePareja(partido.parejaB);
-    const aEnA = idsA.includes(idJugadorA);
-    const aEnB = idsB.includes(idJugadorA);
-    const bEnA = idsA.includes(idJugadorB);
-    const bEnB = idsB.includes(idJugadorB);
+    const enA = idsA.includes(idJugador);
+    const enB = idsB.includes(idJugador);
+    if (!enA && !enB) continue;
 
-    const enfrentados = (aEnA && bEnB) || (aEnB && bEnA);
-    if (!enfrentados) continue;
+    const rivales = enA ? idsB : idsA;
+    const rivalDelGrupo = rivales.some((id) => idsGrupo.includes(id));
+    if (!rivalDelGrupo) continue;
 
-    if (partido.ganadorPareja === 'A') {
-      if (aEnA) victoriasA++;
-      else victoriasB++;
-    } else if (partido.ganadorPareja === 'B') {
-      if (aEnB) victoriasA++;
-      else victoriasB++;
+    if ((enA && partido.ganadorPareja === 'A') || (enB && partido.ganadorPareja === 'B')) {
+      victorias++;
     }
   }
-  return victoriasA - victoriasB;
+  return victorias;
 }
 
 function ordenarClasificacion(stats) {
-  return stats.slice().sort((a, b) => {
-    if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-    const h2h = enfrentamientoDirecto(a.id, b.id);
-    if (h2h !== 0) return -h2h;
-    return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
-  });
+  const grupos = new Map();
+  for (const s of stats) {
+    if (!grupos.has(s.puntos)) grupos.set(s.puntos, []);
+    grupos.get(s.puntos).push(s);
+  }
+
+  const resultado = [];
+  for (const puntos of [...grupos.keys()].sort((a, b) => b - a)) {
+    const grupo = grupos.get(puntos);
+    const idsGrupo = grupo.map((s) => s.id);
+
+    grupo.sort((a, b) => {
+      const victA = victoriasEnGrupo(a.id, idsGrupo);
+      const victB = victoriasEnGrupo(b.id, idsGrupo);
+      if (victB !== victA) return victB - victA;
+      const diffSetsA = a.setsG - a.setsP;
+      const diffSetsB = b.setsG - b.setsP;
+      if (diffSetsB !== diffSetsA) return diffSetsB - diffSetsA;
+      const diffJuegosA = a.juegG - a.juegP;
+      const diffJuegosB = b.juegG - b.juegP;
+      if (diffJuegosB !== diffJuegosA) return diffJuegosB - diffJuegosA;
+      return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+    });
+
+    resultado.push(...grupo);
+  }
+
+  return resultado;
 }
 
 /* ============================================================

@@ -18,7 +18,12 @@ En la pestaña **Jornadas**, despliega cada jornada y rellena los sets (0-7 jueg
 
 ## Clasificación
 
-La pestaña **Clasificación** se recalcula automáticamente con cada resultado introducido: puntos (victoria 3, derrota 1), sets y juegos ganados/perdidos, con desempate por enfrentamiento directo y, en última instancia, alfabético.
+La pestaña **Clasificación** se recalcula automáticamente con cada resultado introducido: puntos (victoria 3, derrota 1), sets y juegos ganados/perdidos. Cuando dos o más jugadores empatan a puntos, el orden entre ellos se decide con estos criterios, en este orden:
+
+1. Victorias en enfrentamientos directos dentro del grupo empatado (mini-liga: cuenta cuántos de esos partidos ganó cada jugador contra otros del mismo grupo).
+2. Diferencia de sets (ganados - perdidos) de toda la liga.
+3. Diferencia de juegos (ganados - perdidos) de toda la liga.
+4. Orden alfabético.
 
 ## Sacar imagen (compartir por WhatsApp o email)
 
