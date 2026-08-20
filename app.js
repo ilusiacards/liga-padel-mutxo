@@ -929,10 +929,18 @@ function generarLiga() {
   }
 
   const ejecutar = () => {
-    ligaState.jornadas = generarCalendario(ligaState.girls.length, ligaState.boys.length);
-    ligaState.liveGenerated = true;
-    guardarEstado();
-    render();
+    mostrarGenerando();
+    // setTimeout con delay > 0 (no 0) para dar tiempo real al navegador a
+    // pintar el overlay antes de que el cálculo síncrono bloquee el hilo
+    // principal; el spinner (animación CSS de solo transform) sigue
+    // corriendo en el compositor mientras tanto.
+    setTimeout(() => {
+      ligaState.jornadas = generarCalendario(ligaState.girls.length, ligaState.boys.length);
+      ligaState.liveGenerated = true;
+      guardarEstado();
+      render();
+      mostrarGenerado();
+    }, 50);
   };
 
   if (ligaState.liveGenerated) {
@@ -940,6 +948,30 @@ function generarLiga() {
   } else {
     ejecutar();
   }
+}
+
+/* ============================================================
+   OVERLAY DE CARGA (generación de liga)
+   ============================================================ */
+
+function mostrarGenerando() {
+  document.getElementById('loading-spinner').hidden = false;
+  document.getElementById('loading-check').hidden = true;
+  document.getElementById('loading-mensaje').innerHTML =
+    'Generando<span class="puntos"><span>.</span><span>.</span><span>.</span></span>';
+  document.getElementById('loading-aceptar').hidden = true;
+  document.getElementById('loading-overlay').hidden = false;
+}
+
+function mostrarGenerado() {
+  document.getElementById('loading-spinner').hidden = true;
+  document.getElementById('loading-check').hidden = false;
+  document.getElementById('loading-mensaje').textContent = 'Liga generada';
+  document.getElementById('loading-aceptar').hidden = false;
+}
+
+function ocultarGenerando() {
+  document.getElementById('loading-overlay').hidden = true;
 }
 
 /* ============================================================
@@ -1029,6 +1061,7 @@ function init() {
 
   document.getElementById('btn-agregar-fila').addEventListener('click', agregarFila);
   document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
+  document.getElementById('loading-aceptar').addEventListener('click', ocultarGenerando);
   document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
   document.getElementById('btn-imagen-clasificacion').addEventListener('click', () => {
     const fecha = new Date().toISOString().slice(0, 10);
