@@ -40,8 +40,9 @@ function cargarEstado() {
 }
 
 /* ============================================================
-   ALGORITMO DE GENERACIÓN DE CALENDARIO (round-robin / método del polígono)
-   Función pura, sin efectos secundarios — testeable desde la consola:
+   ALGORITMO DE GENERACIÓN DE CALENDARIO (round-robin / método del polígono
+   + agrupamiento de partidos que maximiza la cobertura de rivales)
+   Funciones puras, sin efectos secundarios — testeables desde la consola:
      generarCalendario()
    ============================================================ */
 
@@ -54,38 +55,391 @@ function shuffle(array) {
   return copia;
 }
 
-function generarCalendario(numGirls = 8, numBoys = 8) {
-  const girlsOrder = shuffle([...Array(numGirls).keys()]);
-  const boysOrder = shuffle([...Array(numBoys).keys()]);
-  const jornadas = [];
+// Clave canónica (sin importar el orden) para un par de índices del mismo grupo.
+function clavePar(a, b) {
+  return a < b ? `${a}-${b}` : `${b}-${a}`;
+}
 
-  for (let r = 0; r < numGirls; r++) {
+// Método del círculo clásico de programación de round-robin (1-factorización
+// de K_n): produce n-1 rondas de n/2 emparejamientos de POSICIONES 0..n-1
+// donde cada par de posiciones aparece emparejado exactamente una vez.
+// Es la misma construcción determinista que ya se usaba para las parejas
+// chica-chico, aplicada ahora también al agrupamiento en partidos — sirve
+// como punto de partida de altísima calidad para la fase de refinamiento,
+// en vez de arrancar desde un agrupamiento puramente al azar.
+function metodoDelCirculo(n) {
+  const rondas = [];
+  const fijo = n - 1;
+  for (let r = 0; r < n - 1; r++) {
+    const pares = [[fijo, r]];
+    for (let k = 1; k < n / 2; k++) {
+      const a = (((r - k) % (n - 1)) + (n - 1)) % (n - 1);
+      const b = (r + k) % (n - 1);
+      pares.push([a, b]);
+    }
+    rondas.push(pares);
+  }
+  return rondas;
+}
+
+// Agrupa las n parejas de una jornada en n/2 partidos, con un orden aleatorio.
+function agrupamientoAleatorio(pares) {
+  const barajado = shuffle(pares);
+  const partidos = [];
+  for (let p = 0; p < barajado.length / 2; p++) {
+    partidos.push([barajado[p * 2], barajado[p * 2 + 1]]);
+  }
+  return partidos;
+}
+
+// Historial de cruces de rivalidad ya jugados: Map clave -> nº de veces.
+// Se usan contadores (no un simple Set) porque la fase de refinamiento
+// necesita poder "retirar" la contribución de una jornada y volver a
+// calcularla sin perder la cuenta de lo que aportan las demás.
+function contarClave(mapa, clave) {
+  return mapa.get(clave) || 0;
+}
+
+// Nº de claves realmente cubiertas ahora mismo (valor > 0). NO se puede usar
+// mapa.size: el refinamiento decrementa claves a 0 sin borrarlas (para poder
+// volver a incrementarlas), así que .size cuenta también pares "desregistrados".
+function contarCubiertos(mapa) {
+  let cubiertos = 0;
+  for (const valor of mapa.values()) {
+    if (valor > 0) cubiertos++;
+  }
+  return cubiertos;
+}
+
+function registrarAgrupamiento(agrupamiento, rivalesGG, rivalesBB, rivalesGB, delta) {
+  for (const [parejaA, parejaB] of agrupamiento) {
+    const claves = [
+      [rivalesGG, clavePar(parejaA.girlIdx, parejaB.girlIdx)],
+      [rivalesBB, clavePar(parejaA.boyIdx, parejaB.boyIdx)],
+      [rivalesGB, `g${parejaA.girlIdx}-b${parejaB.boyIdx}`],
+      [rivalesGB, `g${parejaB.girlIdx}-b${parejaA.boyIdx}`],
+    ];
+    for (const [mapa, clave] of claves) {
+      mapa.set(clave, contarClave(mapa, clave) + delta);
+    }
+  }
+}
+
+// Cuenta cuántos de los 4 cruces de rivalidad (chica-chica, chico-chico,
+// chica-chico ×2) de cada partido son NUEVOS (cuenta 0) respecto al resto
+// del calendario ya generado.
+function puntuarAgrupamiento(agrupamiento, rivalesGG, rivalesBB, rivalesGB) {
+  let nuevos = 0;
+  for (const [parejaA, parejaB] of agrupamiento) {
+    if (contarClave(rivalesGG, clavePar(parejaA.girlIdx, parejaB.girlIdx)) === 0) nuevos++;
+    if (contarClave(rivalesBB, clavePar(parejaA.boyIdx, parejaB.boyIdx)) === 0) nuevos++;
+    if (contarClave(rivalesGB, `g${parejaA.girlIdx}-b${parejaB.boyIdx}`) === 0) nuevos++;
+    if (contarClave(rivalesGB, `g${parejaB.girlIdx}-b${parejaA.boyIdx}`) === 0) nuevos++;
+  }
+  return nuevos;
+}
+
+const INTENTOS_AGRUPAMIENTO = 500;
+
+// El presupuesto de refinamiento escala con n: grupos grandes tienen mucho
+// más espacio de combinaciones que cubrir, así que necesitan más pasadas
+// para acercarse a su techo de cobertura; grupos pequeños ya lo alcanzan
+// con pocas. Medido en la práctica (ver notas de la sesión): más allá de
+// esto los rendimientos son marginales frente al coste en tiempo, y esto
+// mantiene la generación bien por debajo de 5s incluso con n=16.
+function pasadasRefinamiento(n) {
+  return Math.max(8, n);
+}
+
+// Prueba varios agrupamientos aleatorios de las parejas de la jornada y se
+// queda con el que más cruces de rivalidad nuevos aporta (nunca reintenta de
+// forma indefinida: número de intentos acotado, siempre converge).
+function mejorAgrupamientoPartidos(pares, rivalesGG, rivalesBB, rivalesGB) {
+  const puntuacionMaxima = (pares.length / 2) * 4;
+  let mejor = null;
+  let mejorPuntuacion = -1;
+  for (let intento = 0; intento < INTENTOS_AGRUPAMIENTO && mejorPuntuacion < puntuacionMaxima; intento++) {
+    const candidato = agrupamientoAleatorio(pares);
+    const puntuacion = puntuarAgrupamiento(candidato, rivalesGG, rivalesBB, rivalesGB);
+    if (puntuacion > mejorPuntuacion) {
+      mejorPuntuacion = puntuacion;
+      mejor = candidato;
+    }
+  }
+  return mejor;
+}
+
+// Construye UN calendario candidato completo: fase 1 (parejas chica-chico,
+// método del polígono) + fase 2 (agrupamiento en partidos). La fase 2 arranca
+// desde el método del círculo aplicado a las posiciones (garantiza de
+// entrada cobertura óptima de rivalidad chica-chica) y luego aplica varias
+// pasadas de refinamiento por coordenadas, cada una recalculando una jornada
+// contra el resto del calendario ya fijado, para acercar también la
+// cobertura chico-chico y chica-chico a la totalidad. Devuelve además el nº
+// total de cruces de rivalidad distintos cubiertos, para comparar candidatos.
+//
+// Si n es impar, cada jornada sobra una pareja (no se puede repartir un
+// número impar de parejas en partidos de 2 en 2): descansa la pareja de la
+// posición r en la jornada r. Como 2 es invertible módulo n cuando n es
+// impar, rotar el descanso por posición garantiza que cada chica Y cada
+// chico descansan exactamente una jornada en toda la liga (nunca más de
+// una vez, nunca ninguna).
+function generarCandidato(n) {
+  const girlsOrder = shuffle([...Array(n).keys()]);
+  const boysOrder = shuffle([...Array(n).keys()]);
+  const esImpar = n % 2 !== 0;
+  const posicionesRondas = esImpar ? null : metodoDelCirculo(n); // n-1 rondas de posiciones
+
+  const paresPorJornada = [];
+  for (let r = 0; r < n; r++) {
     const pares = [];
-    for (let i = 0; i < numGirls; i++) {
-      const girlIdx = girlsOrder[i];
-      const boyIdx = boysOrder[(i + r) % numBoys];
-      pares.push({ girlIdx, boyIdx });
+    for (let i = 0; i < n; i++) {
+      pares.push({ girlIdx: girlsOrder[i], boyIdx: boysOrder[(i + r) % n] });
     }
-    const paresBarajados = shuffle(pares);
-    const partidos = [];
-    for (let p = 0; p < paresBarajados.length / 2; p++) {
-      partidos.push({
-        id: `j${r + 1}-p${p + 1}`,
-        parejaA: paresBarajados[p * 2],
-        parejaB: paresBarajados[p * 2 + 1],
-        sets: [
-          { a: null, b: null },
-          { a: null, b: null },
-          { a: null, b: null },
-        ],
-        completado: false,
-        ganadorPareja: null,
-      });
-    }
-    jornadas.push({ numero: r + 1, partidos, colapsada: false });
+    paresPorJornada.push(pares);
   }
 
-  return jornadas;
+  // Con n impar, la pareja que descansa en la jornada r es la de la
+  // posición r (girlsOrder[r] junto con el chico que le toque esa jornada).
+  const parejaActiva = (pares, r) => (esImpar ? pares.filter((_, idx) => idx !== r) : pares);
+
+  const rivalesGG = new Map();
+  const rivalesBB = new Map();
+  const rivalesGB = new Map();
+
+  const agrupamientos = paresPorJornada.map((pares, r) => {
+    const activos = parejaActiva(pares, r);
+    let agrupamiento;
+    if (esImpar) {
+      // Sin tabla algebraica fija posible (el conjunto activo cambia de
+      // posiciones cada jornada): se arranca desde un agrupamiento aleatorio
+      // y se confía en las pasadas de refinamiento de más abajo.
+      agrupamiento = agrupamientoAleatorio(activos);
+    } else {
+      const posiciones = posicionesRondas[r % (n - 1)];
+      agrupamiento = posiciones.map(([p, q]) => [pares[p], pares[q]]);
+    }
+    registrarAgrupamiento(agrupamiento, rivalesGG, rivalesBB, rivalesGB, 1);
+    return agrupamiento;
+  });
+
+  // Importante: la reoptimización de una jornada solo mira cuántos cruces
+  // NUEVOS aporta el candidato, sin saber cuántos cruces únicos aportaba la
+  // jornada anterior que ahora se pierden. Sin comparar contra quedarse como
+  // estaba, una pasada podía cambiar una jornada por otra "mejor" en
+  // aislado pero peor en total (deshacía cobertura ya conseguida). Por eso
+  // se compara explícitamente contra el agrupamiento anterior y solo se
+  // sustituye si es estrictamente mejor — la cobertura total nunca baja.
+  const pasadas = pasadasRefinamiento(n);
+  for (let pasada = 0; pasada < pasadas; pasada++) {
+    for (const r of shuffle([...Array(n).keys()])) {
+      const anterior = agrupamientos[r];
+      const activos = parejaActiva(paresPorJornada[r], r);
+      registrarAgrupamiento(anterior, rivalesGG, rivalesBB, rivalesGB, -1);
+      const candidato = mejorAgrupamientoPartidos(activos, rivalesGG, rivalesBB, rivalesGB);
+      const puntuacionCandidato = puntuarAgrupamiento(candidato, rivalesGG, rivalesBB, rivalesGB);
+      const puntuacionAnterior = puntuarAgrupamiento(anterior, rivalesGG, rivalesBB, rivalesGB);
+      agrupamientos[r] = puntuacionCandidato > puntuacionAnterior ? candidato : anterior;
+      registrarAgrupamiento(agrupamientos[r], rivalesGG, rivalesBB, rivalesGB, 1);
+    }
+  }
+
+  const cobertura = contarCubiertos(rivalesGG) + contarCubiertos(rivalesBB) + contarCubiertos(rivalesGB);
+  const descansaPorJornada = esImpar ? paresPorJornada.map((pares, r) => pares[r]) : paresPorJornada.map(() => null);
+  return { agrupamientos, cobertura, descansaPorJornada };
+}
+
+const CANDIDATOS_CALENDARIO = 6;
+
+/* ============================================================
+   REPARACIÓN DE EQUIDAD: tras elegir el mejor calendario, en vez de seguir
+   optimizando el total a ciegas, se identifica a la persona con MENOS
+   rivales distintos y se busca un intercambio concreto entre dos partidos
+   de una misma jornada que le añada uno de sus rivales que le faltan — solo
+   se aplica si no empeora a nadie más. Ataca directamente el peor caso
+   (fairness), no la media.
+   ============================================================ */
+
+function idsPersonas(n) {
+  const ids = [];
+  for (let i = 0; i < n; i++) ids.push(`g${i}`);
+  for (let i = 0; i < n; i++) ids.push(`b${i}`);
+  return ids;
+}
+
+// Localiza en qué partido de una jornada (y en qué lado, A o B) juega una
+// persona. Devuelve null si esa jornada la persona descansa.
+function localizarEnAgrupamiento(agrupamiento, personId) {
+  const tipo = personId[0];
+  const idx = Number(personId.slice(1));
+  for (let i = 0; i < agrupamiento.length; i++) {
+    const [parejaA, parejaB] = agrupamiento[i];
+    for (const lado of ['A', 'B']) {
+      const pareja = lado === 'A' ? parejaA : parejaB;
+      const coincide = tipo === 'g' ? pareja.girlIdx === idx : pareja.boyIdx === idx;
+      if (coincide) return { partidoIdx: i, lado };
+    }
+  }
+  return null;
+}
+
+// Contador incremental de rivalidades persona-a-persona: contador[id] es un
+// Map oponente -> nº de veces que se han enfrentado. Se usa (en vez de
+// recontar todo el calendario en cada intento) porque un solo intercambio
+// entre dos partidos solo puede afectar a las 4 parejas implicadas — de
+// lo contrario, para N grande, repasar toda la liga en cada intento de
+// intercambio es demasiado lento (llegó a tardar >30s con N=16).
+function crearContadorRivales(agrupamientos, n) {
+  const contador = {};
+  for (const id of idsPersonas(n)) contador[id] = new Map();
+  for (const agrupamiento of agrupamientos) {
+    for (const [parejaA, parejaB] of agrupamiento) {
+      ajustarContadorPartido(contador, parejaA, parejaB, 1);
+    }
+  }
+  return contador;
+}
+
+function ajustarContadorPartido(contador, parejaA, parejaB, delta) {
+  const gA = `g${parejaA.girlIdx}`, bA = `b${parejaA.boyIdx}`;
+  const gB = `g${parejaB.girlIdx}`, bB = `b${parejaB.boyIdx}`;
+  for (const [x, y] of [[gA, bB], [bA, gB], [gA, gB], [bA, bB]]) {
+    contador[x].set(y, (contador[x].get(y) || 0) + delta);
+    contador[y].set(x, (contador[y].get(x) || 0) + delta);
+  }
+}
+
+function distintosCubiertos(mapaOponentes) {
+  let cubiertos = 0;
+  for (const veces of mapaOponentes.values()) {
+    if (veces > 0) cubiertos++;
+  }
+  return cubiertos;
+}
+
+// Acotado por construcción: como máximo RONDAS_MAXIMAS_EQUIDAD vueltas
+// completas, y se para en cuanto una vuelta entera no logra ningún arreglo
+// — nunca reintenta de forma indefinida. Recorre a TODAS las personas con
+// hueco en cada vuelta (no solo a la peor cubierta): que una no tenga
+// arreglo disponible no debe impedir arreglar a otras.
+const RONDAS_MAXIMAS_EQUIDAD = 20;
+
+function repararEquidad(agrupamientos, n) {
+  const maxPosibles = 2 * n - 1;
+  const contador = crearContadorRivales(agrupamientos, n);
+
+  for (let ronda = 0; ronda < RONDAS_MAXIMAS_EQUIDAD; ronda++) {
+    let algunArreglo = false;
+    const necesitados = shuffle(
+      idsPersonas(n).filter((id) => distintosCubiertos(contador[id]) < maxPosibles)
+    );
+    if (necesitados.length === 0) break; // todo el mundo cubre a todos
+
+    for (const persona of necesitados) {
+      if (distintosCubiertos(contador[persona]) >= maxPosibles) continue; // ya se arregló esta vuelta
+
+      const faltantes = shuffle(
+        idsPersonas(n).filter((id) => id !== persona && (contador[persona].get(id) || 0) === 0)
+      );
+
+      let arreglado = false;
+      for (const candidato of faltantes) {
+        for (let r = 0; r < agrupamientos.length && !arreglado; r++) {
+          const locPersona = localizarEnAgrupamiento(agrupamientos[r], persona);
+          const locCandidato = localizarEnAgrupamiento(agrupamientos[r], candidato);
+          if (!locPersona || !locCandidato || locPersona.partidoIdx === locCandidato.partidoIdx) continue;
+
+          const agrupamiento = agrupamientos[r];
+          const partidoX = agrupamiento[locPersona.partidoIdx];
+          const partidoY = agrupamiento[locCandidato.partidoIdx];
+          const parejaX = locPersona.lado === 'A' ? partidoX[0] : partidoX[1];
+          const parejaXop = locPersona.lado === 'A' ? partidoX[1] : partidoX[0];
+          const parejaY = locCandidato.lado === 'A' ? partidoY[0] : partidoY[1];
+          const parejaYop = locCandidato.lado === 'A' ? partidoY[1] : partidoY[0];
+
+          const afectados = [parejaX, parejaXop, parejaY, parejaYop].flatMap((p) => [
+            `g${p.girlIdx}`,
+            `b${p.boyIdx}`,
+          ]);
+          const antes = {};
+          for (const id of afectados) antes[id] = distintosCubiertos(contador[id]);
+
+          ajustarContadorPartido(contador, parejaX, parejaXop, -1);
+          ajustarContadorPartido(contador, parejaY, parejaYop, -1);
+          ajustarContadorPartido(contador, parejaX, parejaY, 1);
+          ajustarContadorPartido(contador, parejaXop, parejaYop, 1);
+
+          const empeoraAAlguien = afectados.some((id) => distintosCubiertos(contador[id]) < antes[id]);
+          if (empeoraAAlguien) {
+            ajustarContadorPartido(contador, parejaX, parejaY, -1);
+            ajustarContadorPartido(contador, parejaXop, parejaYop, -1);
+            ajustarContadorPartido(contador, parejaX, parejaXop, 1);
+            ajustarContadorPartido(contador, parejaY, parejaYop, 1);
+          } else {
+            agrupamiento[locPersona.partidoIdx] = [parejaX, parejaY];
+            agrupamiento[locCandidato.partidoIdx] = [parejaXop, parejaYop];
+            arreglado = true;
+            algunArreglo = true;
+          }
+        }
+        if (arreglado) break;
+      }
+    }
+
+    if (!algunArreglo) break; // vuelta completa sin ningún arreglo: converge, parar
+  }
+}
+
+// numGirls debe ser igual a numBoys (soporte para grupos desiguales, con
+// distinto nº de chicas que de chicos, no implementado: requeriría decidir
+// qué pasa con las personas sobrantes de más de un tipo cada jornada).
+// numGirls/numBoys ya no están fijados a 8: cualquier tamaño funciona igual,
+// par o impar — con n impar, una pareja descansa cada jornada por turnos
+// (ver generarCandidato).
+//
+// Criterio de cobertura total de rivales: dado que la fase 2 es una búsqueda
+// heurística (no existe una fórmula cerrada que garantice el óptimo para
+// cualquier n), se generan varios calendarios candidatos completos y se
+// devuelve el de mayor cobertura de rivalidad — acotado a
+// CANDIDATOS_CALENDARIO intentos, siempre converge.
+function generarCalendario(numGirls = 8, numBoys = 8) {
+  if (numGirls !== numBoys) {
+    throw new Error('generarCalendario requiere el mismo número de chicas y chicos.');
+  }
+  const n = numGirls;
+  const coberturaMaxima = (n * (n - 1)) / 2 /* GG */ + (n * (n - 1)) / 2 /* BB */ + n * n /* GB */;
+
+  let mejorCandidato = null;
+  for (let intento = 0; intento < CANDIDATOS_CALENDARIO; intento++) {
+    const candidato = generarCandidato(n);
+    if (!mejorCandidato || candidato.cobertura > mejorCandidato.cobertura) {
+      mejorCandidato = candidato;
+    }
+    if (mejorCandidato.cobertura === coberturaMaxima) break;
+  }
+
+  repararEquidad(mejorCandidato.agrupamientos, n);
+
+  return mejorCandidato.agrupamientos.map((agrupamiento, r) => {
+    const partidos = agrupamiento.map(([parejaA, parejaB], p) => ({
+      id: `j${r + 1}-p${p + 1}`,
+      parejaA,
+      parejaB,
+      sets: [
+        { a: null, b: null },
+        { a: null, b: null },
+        { a: null, b: null },
+      ],
+      completado: false,
+      ganadorPareja: null,
+    }));
+    return {
+      numero: r + 1,
+      partidos,
+      colapsada: false,
+      descansa: mejorCandidato.descansaPorJornada[r],
+    };
+  });
 }
 
 /* ============================================================
@@ -282,6 +636,9 @@ function renderColumnaJugadores(contenedorId, lista, campo) {
   const contenedor = document.getElementById(contenedorId);
   contenedor.innerHTML = '';
   lista.forEach((nombre, idx) => {
+    const fila = document.createElement('div');
+    fila.className = 'fila-jugador';
+
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'input-jugador';
@@ -293,7 +650,18 @@ function renderColumnaJugadores(contenedorId, lista, campo) {
       renderJornadas();
       renderClasificacion();
     });
-    contenedor.appendChild(input);
+
+    const btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.className = 'btn-eliminar-fila';
+    btnEliminar.textContent = '×';
+    btnEliminar.setAttribute('aria-label', `Eliminar pareja ${idx + 1}`);
+    btnEliminar.disabled = lista.length <= MIN_PAREJAS;
+    btnEliminar.addEventListener('click', () => eliminarFila(idx));
+
+    fila.appendChild(input);
+    fila.appendChild(btnEliminar);
+    contenedor.appendChild(fila);
   });
 }
 
@@ -355,6 +723,13 @@ function renderJornadas() {
       partidosWrap.appendChild(crearPartidoCard(partido));
     });
     card.appendChild(partidosWrap);
+
+    if (jornada.descansa) {
+      const descansa = document.createElement('p');
+      descansa.className = 'jornada-descansa';
+      descansa.textContent = `Pareja ${nombrePareja(jornada.descansa)} descansan`;
+      card.appendChild(descansa);
+    }
 
     contenedor.appendChild(card);
   });
@@ -495,19 +870,66 @@ function mostrarModal(mensaje, onConfirmar) {
    ACCIONES DE UI
    ============================================================ */
 
+// Mínimo funcional, no arbitrario: con 1 sola pareja por grupo no hay nadie
+// contra quien jugar (generarCalendario produciría una liga con 0 partidos
+// reales — ver notas de la sesión). 2 es el mínimo que da al menos 1 partido.
+const MIN_PAREJAS = 2;
+
 function nombresCompletos() {
   return ligaState.girls.every((n) => n.trim() !== '') &&
          ligaState.boys.every((n) => n.trim() !== '');
 }
 
+// Añadir/eliminar fila cambia cuántas personas hay, así que cualquier
+// calendario ya generado queda con índices que no corresponden a nada —
+// si ya había una liga generada, se avisa (mismo mecanismo que regenerar)
+// antes de invalidarla.
+function conConfirmacionSiHayLiga(mensaje, accion) {
+  if (ligaState.liveGenerated) {
+    mostrarModal(mensaje, accion);
+  } else {
+    accion();
+  }
+}
+
+function agregarFila() {
+  conConfirmacionSiHayLiga(
+    'Añadir una pareja invalida el calendario ya generado y borrará los resultados actuales. ¿Continuar?',
+    () => {
+      ligaState.girls.push('');
+      ligaState.boys.push('');
+      ligaState.jornadas = [];
+      ligaState.liveGenerated = false;
+      guardarEstado();
+      render();
+    }
+  );
+}
+
+function eliminarFila(idx) {
+  if (ligaState.girls.length <= MIN_PAREJAS) return;
+  conConfirmacionSiHayLiga(
+    'Eliminar una pareja invalida el calendario ya generado y borrará los resultados actuales. ¿Continuar?',
+    () => {
+      ligaState.girls.splice(idx, 1);
+      ligaState.boys.splice(idx, 1);
+      ligaState.jornadas = [];
+      ligaState.liveGenerated = false;
+      guardarEstado();
+      render();
+    }
+  );
+}
+
 function generarLiga() {
   if (!nombresCompletos()) {
-    alert('Rellena los 16 nombres (8 chicas y 8 chicos) antes de generar la liga.');
+    const total = ligaState.girls.length + ligaState.boys.length;
+    alert(`Rellena los ${total} nombres (${ligaState.girls.length} chicas y ${ligaState.boys.length} chicos) antes de generar la liga.`);
     return;
   }
 
   const ejecutar = () => {
-    ligaState.jornadas = generarCalendario();
+    ligaState.jornadas = generarCalendario(ligaState.girls.length, ligaState.boys.length);
     ligaState.liveGenerated = true;
     guardarEstado();
     render();
@@ -605,6 +1027,7 @@ function init() {
     activarTab(btn.dataset.tab);
   });
 
+  document.getElementById('btn-agregar-fila').addEventListener('click', agregarFila);
   document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
   document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
   document.getElementById('btn-imagen-clasificacion').addEventListener('click', () => {
