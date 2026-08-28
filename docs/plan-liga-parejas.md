@@ -286,16 +286,21 @@ escapen). **Paralelizable:** no.
 **Modelo:** Sonnet. **Paralelizable:** en principio no (toca `index.html`/`app.js`);
 se ejecuta la última.
 
-- [ ] Fase 6 ejecutada
-- [ ] Diff revisado a mano por Fable
-- [ ] Verificada (criterios a–c) y desplegada en GitHub Pages
+- [x] Fase 6 ejecutada
+- [x] Diff revisado a mano por Fable (app.js solo gana el bloque de registro;
+      sw.js solo GET + mismo origen; icono inspeccionado)
+- [x] Verificada (criterios a–c: file:// intacto, caché 8/8, recarga con el
+      servidor APAGADO funciona — offline real) y desplegada en GitHub Pages
+      (manifest, sw.js e iconos responden 200 en la URL pública)
 
 ---
 
 ## Cierre del plan
 
-- [ ] Todas las fases verificadas y pusheadas
-- [ ] Memoria del proyecto actualizada (modelo v2 individual, campo `modo` reservado,
-      migración v1, decisiones de este plan)
-- [ ] Retirar este doc (`git rm docs/plan-liga-parejas.md` + commit) tras comprobar
+- [x] Todas las fases verificadas y pusheadas (c9d4ab9, ba7711b, 1a5662c, 1d1eb4d,
+      ef364cd, b260f77)
+- [x] Memoria del proyecto actualizada
+- [x] Retirar este doc (`git rm docs/plan-liga-parejas.md` + commit) tras comprobar
       por grep que nada lo referencia
+- Nota descartada por el usuario (2026-08-28): histórico global de jugador entre
+  ligas (casado por nombre) — "déjalo así de momento".
