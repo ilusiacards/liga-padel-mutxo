@@ -115,7 +115,9 @@ PARAR hasta luz verde explícita.
 - [x] Verificada en navegador (criterios a–i; 19/19 del agente + verificación
       propia: carga, solo lectura, ficha, 404, clave admin intacta, sin
       "consulta" visible, admin file:// intacto)
-- [ ] Desplegada en Pages y comprobada la URL pública de jugador.html
+- [x] Desplegada en Pages y comprobada la URL pública de jugador.html
+      (jugador.html y manifest-jugador 200, sw.js sirve v2, liga-oficial 404
+      esperado hasta la primera publicación)
 
 ---
 
@@ -177,9 +179,11 @@ PARAR hasta luz verde explícita.
 **Modelo:** Sonnet (flujo cerrado arriba; la parte delicada — token y base64 —
 queda especificada). **Paralelizable:** no.
 
-- [ ] Fase 2 ejecutada
-- [ ] Diff revisado a mano por Fable
-- [ ] Verificada (criterios a–g)
+- [x] Fase 2 ejecutada
+- [x] Diff revisado a mano por Fable
+- [x] Verificada (criterios a–g; 401 probado contra la API real con token falso;
+      de propina, verificado el flujo de actualización del SW v2→v3: una recarga
+      por detrás, como es esperable en PWA)
 - [ ] Publicación real de prueba hecha (admin) y jugador.html reflejándola
 
 ---

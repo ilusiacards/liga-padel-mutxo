@@ -37,32 +37,39 @@ muestra la última liga que se descargó; si no se ha llegado a descargar ningun
 avisa de que hace falta internet. Bajo el título aparece la línea
 "Actualizado: …" con la fecha de la última publicación.
 
-### Publicar la liga (mientras no exista el botón)
+### Publicar resultados (admin)
 
-El "tablón oficial" es el archivo `liga-oficial.json` en la raíz de este repo.
-Hasta que exista el botón **Publicar resultados** en la app de gestión, se sube a
-mano:
+En la pestaña **Jugadores** de la app de gestión, junto a "Compartir enlace",
+el botón **Publicar resultados** sube la liga activa como `liga-oficial.json`
+a la raíz del repo — el "tablón oficial" que `jugador.html` descarga. El
+contenido es exactamente el del export (`girls`, `boys`, `jornadas`,
+`liveGenerated`) más un campo `publicadoEl` con la fecha y hora (ISO) de la
+publicación, que alimenta la línea "Actualizado: …" de la app de jugadores.
 
-1. En la app de gestión, con la liga que quieres publicar activa, pulsa
-   **Exportar Datos**. Se descarga `liga-padel-mutxo-{fecha}.json`.
-2. (Opcional pero recomendado) Abre ese archivo y añade dentro del objeto un
-   campo `publicadoEl` con la fecha y hora en formato ISO, por ejemplo:
+La primera vez que lo pulses (o si el token guardado deja de servir) te pide
+un **token de acceso personal de GitHub**, que se guarda solo en este
+dispositivo — en el `localStorage` del navegador, nunca en el repo ni en el
+código — y es el que usa la app para subir el archivo en tu nombre. Para
+crear uno:
 
-   ```json
-   { "publicadoEl": "2026-08-28T19:30:00.000Z", "girls": ["..."], "boys": ["..."], "jornadas": [] }
-   ```
+1. En GitHub: **Settings → Developer settings → Personal access tokens →
+   Fine-grained tokens → Generate new token**.
+2. **Repository access**: *Only select repositories* → elige
+   `liga-padel-mutxo`.
+3. **Permissions → Repository permissions → Contents**: `Read and write`. No
+   hace falta ningún otro permiso.
+4. Elige la fecha de expiración que prefieras y genera el token.
+5. Pégalo en el aviso que muestra la app.
 
-   Es lo que alimenta la línea "Actualizado: …" de la app de jugadores. Si no
-   está, la línea simplemente no se muestra.
-3. Renómbralo a `liga-oficial.json` y súbelo a la **raíz** del repo
-   `ilusiacards/liga-padel-mutxo` en la rama `main` (por la web de GitHub:
-   *Add file → Upload files*, y si ya existe, entrar en el archivo y usar
-   *Edit* para pegar el contenido nuevo).
-4. Un minuto después, GitHub Pages lo sirve y la app de los jugadores ya lo coge.
+Ese token es revocable en cualquier momento desde GitHub (misma pantalla,
+**Personal access tokens → Fine-grained tokens**) sin que afecte a nada más
+de tu cuenta, y solo puede tocar el contenido de este repo.
 
-El formato es exactamente el del export (`girls`, `boys`, `jornadas`,
-`liveGenerated`) más el `publicadoEl` opcional: cualquier otro contenido hace que
-la app de jugadores avise de que no ha podido leer la liga publicada.
+Al pulsar Publicar, tras confirmar, el botón pasa a "Publicando…" y termina
+en "Publicado ✓ (visible en ~1 min)" si todo va bien. Un minuto después
+`jugador.html` ya sirve los resultados nuevos. Si el token es inválido o ha
+caducado, la app lo borra y avisa para que pegues uno nuevo la próxima vez
+que pulses Publicar; sin conexión, avisa de que no se ha podido publicar.
 
 ## Cómo generar la liga
 

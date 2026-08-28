@@ -4,7 +4,7 @@
 // IMPORTANTE: al desplegar cambios en index.html/app.js/style.css/etc,
 // subir la versión de CACHE de abajo para que el navegador descarte la
 // caché vieja y sirva los ficheros nuevos.
-const CACHE = 'liga-mutxo-v2';
+const CACHE = 'liga-mutxo-v3';
 
 const ARCHIVOS = [
   '.',
