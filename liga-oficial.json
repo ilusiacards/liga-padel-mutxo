@@ -76,20 +76,20 @@
           },
           "sets": [
             {
-              "a": 6,
-              "b": 4
-            },
-            {
-              "a": 3,
+              "a": 4,
               "b": 6
             },
             {
               "a": 6,
-              "b": 0
+              "b": 3
+            },
+            {
+              "a": 0,
+              "b": 6
             }
           ],
           "completado": true,
-          "ganadorPareja": "A"
+          "ganadorPareja": "B"
         },
         {
           "id": "j1-p3",
@@ -3021,5 +3021,5 @@
     }
   ],
   "liveGenerated": true,
-  "publicadoEl": "2026-08-28T20:00:42.169Z"
+  "publicadoEl": "2026-08-28T20:02:19.364Z"
 }
