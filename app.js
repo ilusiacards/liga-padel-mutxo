@@ -1902,6 +1902,17 @@ function init() {
   });
 
   manejarHashCompartido();
+
+  // PWA (Fase 6): solo se registra el service worker cuando la app se sirve
+  // por https o localhost. Por file:// (doble clic) no se registra nada y
+  // todo sigue funcionando exactamente igual que antes.
+  const protocoloValido = location.protocol === 'https:' ||
+    location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if ('serviceWorker' in navigator && protocoloValido) {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('No se pudo registrar el service worker:', err);
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -6,6 +6,15 @@ App web 100% estática (sin framework, sin build, sin backend) para gestionar la
 
 Haz doble clic en `index.html` (o ábrelo desde el navegador con `Archivo > Abrir`). No necesita servidor ni instalación.
 
+## Instalar como app (PWA)
+
+Desde la URL pública (`https://ilusiacards.github.io/liga-padel-mutxo/`), el navegador
+ofrece **Añadir a pantalla de inicio** (móvil) o **Instalar** (icono en la barra de
+direcciones, escritorio). Una vez instalada funciona offline tras la primera visita:
+el propio navegador se encarga de guardar los ficheros de la app en caché. Los datos
+de tu liga siguen viviendo solo en el navegador (`localStorage`), igual que siempre;
+instalar la app no cambia dónde se guardan ni cómo se comparten.
+
 ## Cómo generar la liga
 
 1. Ve a la pestaña **Jugadores** y escribe los 8 nombres de la Columna 1 y los 8 de la Columna 2.
