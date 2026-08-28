@@ -9,6 +9,14 @@
 <body>
   <header class="app-header">
     <h1>Liga Mutxo Padel</h1>
+    <div class="ligas-barra">
+      <select id="selector-liga" class="selector-liga" aria-label="Liga activa"></select>
+      <div class="ligas-acciones">
+        <button id="btn-liga-nueva" class="btn btn-secondary btn-mini">Nueva</button>
+        <button id="btn-liga-renombrar" class="btn btn-secondary btn-mini">Renombrar</button>
+        <button id="btn-liga-eliminar" class="btn btn-secondary btn-mini">Eliminar</button>
+      </div>
+    </div>
     <nav class="tab-nav" id="tab-nav">
       <button class="tab-btn active" data-tab="jugadores">Jugadores</button>
       <button class="tab-btn" data-tab="jornadas">Jornadas</button>
@@ -85,6 +93,17 @@
       <div class="modal-acciones">
         <button id="modal-cancelar" class="btn btn-secondary">Cancelar</button>
         <button id="modal-confirmar" class="btn btn-destructive">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-texto-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <p id="modal-texto-mensaje"></p>
+      <input type="text" id="modal-texto-input" class="modal-texto-input" maxlength="40" autocomplete="off" />
+      <div class="modal-acciones">
+        <button id="modal-texto-cancelar" class="btn btn-secondary">Cancelar</button>
+        <button id="modal-texto-confirmar" class="btn btn-primary">Guardar</button>
       </div>
     </div>
   </div>

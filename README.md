@@ -31,10 +31,22 @@ La pestaña **Clasificación** se recalcula automáticamente con cada resultado 
 - En la pestaña **Clasificación**, el botón **Sacar imagen** genera una foto de la tabla completa.
 - Al pulsarlo se descarga el archivo PNG (el navegador pedirá dónde guardarlo, según su configuración). Desde ahí puedes adjuntarlo en WhatsApp, email, etc.
 
+## Varias ligas
+
+Debajo del título hay un **selector de liga** con las ligas guardadas y tres botones:
+
+- **Nueva**: pide un nombre (por defecto "Liga N") y crea una liga vacía, que queda activa.
+- **Renombrar**: cambia el nombre de la liga activa.
+- **Eliminar**: borra la liga activa previa confirmación. Siempre tiene que quedar al menos una liga, así que el botón se deshabilita cuando solo hay una.
+
+Cambiar de liga en el selector cambia al instante todas las pestañas (Jugadores, Jornadas y Clasificación): cada liga guarda sus propios jugadores, jornadas y resultados, y la app recuerda cuál estaba activa al recargar.
+
+Todas las ligas viven **solo en este navegador** (`localStorage`, clave `padel-liga-mutxo-v1`): no se sube nada a ningún servidor y no se sincronizan entre dispositivos. Para eso están el export/import y el enlace compartible, que llevan **solo la liga activa** — al importar un archivo o abrir un enlace, esa liga se añade como una liga nueva a la lista y no sustituye a ninguna de las que ya tienes.
+
 ## Exportar / Importar (compartir entre dispositivos)
 
-- **Exportar Datos**: descarga un archivo `liga-padel-mutxo-{fecha}.json` con todo el estado de la liga.
-- **Importar Datos**: en otro dispositivo o navegador, usa este botón para cargar el archivo exportado y continuar con los mismos datos. Se pedirá confirmación antes de sobrescribir los datos actuales.
+- **Exportar Datos**: descarga un archivo `liga-padel-mutxo-{fecha}.json` con todo el estado de la liga activa.
+- **Importar Datos**: en otro dispositivo o navegador, usa este botón para cargar el archivo exportado. Se pedirá confirmación y la liga del archivo se añadirá como una liga nueva (toma el nombre del archivo).
 
 ## Compartir por enlace
 
@@ -47,12 +59,14 @@ La pestaña **Clasificación** se recalcula automáticamente con cada resultado 
   si abres `index.html` con doble clic (`file://`), el botón avisa de que hace falta
   esa versión web, porque un enlace `file://` no se puede compartir ni abrir en otro
   dispositivo.
-- Al abrir un enlace compartido, la app pregunta si quieres importar esa liga (te
-  pedirá confirmación porque sustituye a la liga que tengas cargada en ese momento).
+- El enlace contiene **solo la liga activa** en ese momento.
+- Al abrir un enlace compartido, la app pregunta si quieres importar esa liga; al
+  aceptar se añade como una liga nueva ("Liga importada") y no sustituye a ninguna
+  de las que ya tengas en ese navegador.
 
 ## Reiniciar desde cero
 
-Los datos se guardan en `localStorage` bajo la clave `padel-liga-mutxo-v1`. Para borrar todo y empezar de nuevo, abre las herramientas de desarrollador del navegador (F12), ve a la pestaña Aplicación/Storage, y elimina esa clave de `localStorage` — o ejecuta en la consola:
+Todas las ligas se guardan en `localStorage` bajo la clave `padel-liga-mutxo-v1`. Para borrar **todas** y empezar de nuevo, abre las herramientas de desarrollador del navegador (F12), ve a la pestaña Aplicación/Storage, y elimina esa clave de `localStorage` — o ejecuta en la consola:
 
 ```js
 localStorage.removeItem('padel-liga-mutxo-v1');

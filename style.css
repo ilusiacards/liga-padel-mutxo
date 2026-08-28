@@ -46,6 +46,45 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   padding: var(--space-3) var(--space-2) var(--space-2);
 }
 
+/* Barra de ligas (selector + acciones), bajo el título */
+.ligas-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.selector-liga {
+  flex: 1 1 140px;
+  max-width: 240px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--surface-elevada);
+  border-radius: var(--radius-input);
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.selector-liga:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+.ligas-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-mini {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+}
+
 .tab-nav {
   display: flex;
   gap: var(--space-1);
@@ -179,6 +218,14 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
 
 .btn:hover { filter: brightness(1.1); }
 .btn:active { transform: scale(0.98); }
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover { filter: none; }
+.btn:disabled:active { transform: none; }
 
 .btn-primary {
   background: var(--primary);
@@ -421,6 +468,25 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   margin-top: var(--space-3);
 }
 
+/* El overlay del modal con campo de texto reutiliza la clase
+   .modal-overlay, así que hereda su par .modal-overlay[hidden] de arriba. */
+.modal-texto-input {
+  width: 100%;
+  margin-top: var(--space-2);
+  background: var(--surface-elevada);
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.modal-texto-input:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
 /* Loading (generación de liga) */
 .loading-overlay {
   position: fixed;
@@ -516,6 +582,21 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
 
   .acciones-datos {
     flex-direction: column;
+  }
+
+  .selector-liga {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  /* Las tres acciones de liga se reparten el ancho en vez de desbordar. */
+  .ligas-acciones {
+    width: 100%;
+  }
+
+  .ligas-acciones .btn-mini {
+    flex: 1;
+    padding: 6px 4px;
   }
 
   h1 { font-size: 1.4rem; }

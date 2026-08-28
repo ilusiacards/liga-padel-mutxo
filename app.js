@@ -20,28 +20,212 @@ function estadoInicial() {
   };
 }
 
+/* ------------------------------------------------------------
+   VARIAS LIGAS EN EL MISMO NAVEGADOR
+
+   Bajo la MISMA clave de localStorage (`padel-liga-mutxo-v1`, sin cambiar
+   de nombre) ya no vive una liga suelta sino el contenedor completo:
+
+     appState = {
+       ligas: [ { id, nombre, creadaEl, liga: <estado de UNA liga> } ],
+       activaId: <id de la liga seleccionada>
+     }
+
+   `ligaState` sigue existiendo y sigue siendo el estado PLANO de UNA liga
+   (girls/boys/jornadas/liveGenerated), pero ahora es una REFERENCIA al
+   objeto `liga` de la entrada activa. Gracias a eso todas las funciones que
+   leen o escriben `ligaState` (render, clasificación, resultados, export,
+   enlace…) siguen funcionando sin enterarse de que hay varias ligas:
+   cambiar de liga activa es reasignar `ligaState` y volver a renderizar.
+
+   El formato de UNA liga (el del export, el del enlace de la Fase 2 y el de
+   los JSON antiguos) NO cambia: sigue siendo el objeto plano.
+   ------------------------------------------------------------ */
+
+let appState = { ligas: [], activaId: null };
 let ligaState = estadoInicial();
 
-function guardarEstado() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ligaState));
+function crearIdLiga() {
+  let id;
+  do {
+    id = Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+  } while (appState.ligas.some((entrada) => entrada.id === id));
+  return id;
 }
 
+// Envuelve un estado plano de liga en una entrada del contenedor.
+function nuevaEntradaLiga(nombre, estadoLiga) {
+  return {
+    id: crearIdLiga(),
+    nombre,
+    creadaEl: new Date().toISOString(),
+    liga: normalizarLiga(estadoLiga),
+  };
+}
+
+// Red de seguridad mínima para estados que vienen de fuera (localStorage,
+// archivo, enlace): no cambia el formato, solo garantiza que `jornadas` es
+// un array para que el render no reviente con datos manipulados a mano.
+function normalizarLiga(estadoLiga) {
+  if (!formaValidaLiga(estadoLiga)) return estadoInicial();
+  if (!Array.isArray(estadoLiga.jornadas)) estadoLiga.jornadas = [];
+  return estadoLiga;
+}
+
+function appStateInicial() {
+  const contenedor = { ligas: [], activaId: null };
+  appState = contenedor;
+  const entrada = nuevaEntradaLiga('Liga 1', estadoInicial());
+  contenedor.ligas.push(entrada);
+  contenedor.activaId = entrada.id;
+  return contenedor;
+}
+
+// Forma del contenedor multi-liga (lo que se guarda desde la Fase 3).
+function formaValidaAppState(parsed) {
+  return Boolean(parsed) && Array.isArray(parsed.ligas) && 'activaId' in parsed;
+}
+
+// Entrada de la liga activa. Si `activaId` apunta a algo que ya no existe
+// (estado manipulado a mano), se recompone sobre la primera liga.
+function entradaActiva() {
+  let entrada = appState.ligas.find((l) => l.id === appState.activaId);
+  if (!entrada) {
+    entrada = appState.ligas[0];
+    if (entrada) appState.activaId = entrada.id;
+  }
+  return entrada;
+}
+
+// Punto único de escritura: antes de serializar se vuelca `ligaState` en la
+// entrada activa, así cualquier reasignación de `ligaState` seguida de
+// guardarEstado() queda persistida sin tocar el resto de ligas.
+function guardarEstado() {
+  const entrada = entradaActiva();
+  if (entrada) entrada.liga = ligaState;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+}
+
+// Reconstruye una lista de entradas saneada a partir de lo guardado:
+// descarta entradas irreconocibles y rellena los campos que falten.
+function normalizarEntradas(ligas) {
+  const usados = new Set();
+  const entradas = [];
+  ligas.forEach((entrada, idx) => {
+    if (!entrada || !formaValidaLiga(entrada.liga)) return;
+    let id = typeof entrada.id === 'string' && entrada.id && !usados.has(entrada.id)
+      ? entrada.id
+      : `liga${idx}-${Math.random().toString(36).slice(2, 8)}`;
+    usados.add(id);
+    entradas.push({
+      id,
+      nombre: typeof entrada.nombre === 'string' && entrada.nombre.trim() ? entrada.nombre : `Liga ${idx + 1}`,
+      creadaEl: typeof entrada.creadaEl === 'string' ? entrada.creadaEl : new Date().toISOString(),
+      liga: normalizarLiga(entrada.liga),
+    });
+  });
+  return entradas;
+}
+
+// Migración interna y silenciosa: un valor guardado con la forma "plana" de
+// antes de la Fase 3 se envuelve como única liga ("Liga 1") y se reescribe
+// ya envuelto. Sin pérdida de datos y sin preguntar nada al usuario.
 function cargarEstado() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
-    ligaState = estadoInicial();
+    appStateInicial();
+    ligaState = entradaActiva().liga;
     return;
   }
+
+  let migrado = false;
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.girls) || !Array.isArray(parsed.boys)) {
+    if (formaValidaAppState(parsed)) {
+      const ligas = normalizarEntradas(parsed.ligas);
+      if (!ligas.length) throw new Error('sin ligas utilizables');
+      appState = { ligas, activaId: parsed.activaId };
+    } else if (formaValidaLiga(parsed)) {
+      appState = { ligas: [], activaId: null }; // lista vacía para generar el id
+      const entrada = nuevaEntradaLiga('Liga 1', parsed);
+      appState.ligas.push(entrada);
+      appState.activaId = entrada.id;
+      migrado = true;
+    } else {
       throw new Error('forma invalida');
     }
-    ligaState = parsed;
   } catch (e) {
     console.warn('Estado corrupto en localStorage, usando estado inicial.', e);
-    ligaState = estadoInicial();
+    appStateInicial();
+    migrado = true;
   }
+
+  ligaState = entradaActiva().liga;
+  if (migrado) guardarEstado();
+}
+
+/* ------------------------------------------------------------
+   ACCIONES SOBRE LA LISTA DE LIGAS
+   ------------------------------------------------------------ */
+
+// "Liga N" con el primer N libre, para no repetir nombres por defecto.
+function nombrePorDefectoLiga() {
+  const nombres = new Set(appState.ligas.map((entrada) => entrada.nombre));
+  let n = appState.ligas.length + 1;
+  while (nombres.has(`Liga ${n}`)) n++;
+  return `Liga ${n}`;
+}
+
+// Crea una liga (vacía o con un estado importado), la activa y renderiza.
+function crearLiga(nombre, estadoLiga) {
+  const entrada = nuevaEntradaLiga(nombre, estadoLiga || estadoInicial());
+  appState.ligas.push(entrada);
+  appState.activaId = entrada.id;
+  ligaState = entrada.liga;
+  guardarEstado();
+  render();
+  return entrada;
+}
+
+function activarLiga(id) {
+  const entrada = appState.ligas.find((l) => l.id === id);
+  if (!entrada || id === appState.activaId) return;
+  guardarEstado(); // deja consolidada la liga que se abandona
+  appState.activaId = id;
+  ligaState = entrada.liga;
+  guardarEstado();
+  render();
+}
+
+function nuevaLiga() {
+  mostrarModalTexto('Nombre de la liga nueva', nombrePorDefectoLiga(), (nombre) => {
+    crearLiga(nombre, estadoInicial());
+  });
+}
+
+function renombrarLigaActiva() {
+  const entrada = entradaActiva();
+  if (!entrada) return;
+  mostrarModalTexto('Nuevo nombre de la liga', entrada.nombre, (nombre) => {
+    entrada.nombre = nombre;
+    guardarEstado();
+    render();
+  });
+}
+
+// Mínimo de 1 liga: sin ninguna no habría estado que mostrar ni editar.
+function eliminarLigaActiva() {
+  if (appState.ligas.length <= 1) return;
+  const entrada = entradaActiva();
+  if (!entrada) return;
+  mostrarModal(`Se eliminará la liga "${entrada.nombre}" con todos sus datos. ¿Continuar?`, () => {
+    appState.ligas = appState.ligas.filter((l) => l.id !== entrada.id);
+    const primera = appState.ligas[0];
+    appState.activaId = primera.id;
+    ligaState = primera.liga;
+    guardarEstado();
+    render();
+  });
 }
 
 /* ============================================================
@@ -632,9 +816,26 @@ function ordenarClasificacion(stats) {
    ============================================================ */
 
 function render() {
+  renderSelectorLigas();
   renderJugadores();
   renderJornadas();
   renderClasificacion();
+}
+
+// Los nombres de liga los escribe el usuario: siempre con textContent,
+// nunca por innerHTML (tampoco en los <option>).
+function renderSelectorLigas() {
+  const select = document.getElementById('selector-liga');
+  if (!select) return;
+  select.innerHTML = '';
+  appState.ligas.forEach((entrada) => {
+    const option = document.createElement('option');
+    option.value = entrada.id;
+    option.textContent = entrada.nombre;
+    select.appendChild(option);
+  });
+  select.value = appState.activaId;
+  document.getElementById('btn-liga-eliminar').disabled = appState.ligas.length <= 1;
 }
 
 function renderJugadores() {
@@ -876,6 +1077,55 @@ function mostrarModal(mensaje, onConfirmar) {
   btnCancelar.addEventListener('click', cerrar);
 }
 
+// Variante del modal con un campo de texto (nombres de liga). Devuelve el
+// valor recortado por callback; el botón de confirmar queda deshabilitado
+// mientras el campo esté vacío, así que nunca sale un nombre en blanco.
+function mostrarModalTexto(mensaje, valorInicial, onConfirmar) {
+  const overlay = document.getElementById('modal-texto-overlay');
+  const mensajeEl = document.getElementById('modal-texto-mensaje');
+  const input = document.getElementById('modal-texto-input');
+  const btnConfirmar = document.getElementById('modal-texto-confirmar');
+  const btnCancelar = document.getElementById('modal-texto-cancelar');
+
+  mensajeEl.textContent = mensaje;
+  input.value = valorInicial;
+  overlay.hidden = false;
+
+  const sincronizar = () => {
+    btnConfirmar.disabled = input.value.trim() === '';
+  };
+  sincronizar();
+
+  const cerrar = () => {
+    overlay.hidden = true;
+    input.removeEventListener('input', sincronizar);
+    input.removeEventListener('keydown', onTecla);
+    btnConfirmar.removeEventListener('click', onConfirmarHandler);
+    btnCancelar.removeEventListener('click', cerrar);
+  };
+  function onConfirmarHandler() {
+    const valor = input.value.trim();
+    if (!valor) return;
+    cerrar();
+    onConfirmar(valor);
+  }
+  function onTecla(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onConfirmarHandler();
+    } else if (e.key === 'Escape') {
+      cerrar();
+    }
+  }
+
+  input.addEventListener('input', sincronizar);
+  input.addEventListener('keydown', onTecla);
+  btnConfirmar.addEventListener('click', onConfirmarHandler);
+  btnCancelar.addEventListener('click', cerrar);
+  input.focus();
+  input.select();
+}
+
 /* ============================================================
    ACCIONES DE UI
    ============================================================ */
@@ -1032,6 +1282,16 @@ function formaValidaLiga(parsed) {
     ('jornadas' in parsed);
 }
 
+// Nombre para la liga que se crea al importar: el del archivo sin extensión
+// si dice algo, y si no un nombre genérico.
+function nombreLigaDesdeArchivo(nombreArchivo) {
+  const base = String(nombreArchivo || '').replace(/\.json$/i, '').trim();
+  return base ? base.slice(0, 40) : 'Liga importada';
+}
+
+// Importar ya no sobrescribe la liga activa: añade una liga nueva a la lista
+// y la activa, así se pueden traer ligas de otros dispositivos sin perder
+// las que ya hay en este navegador.
 function importarJSON(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -1040,10 +1300,9 @@ function importarJSON(file) {
       if (!formaValidaLiga(parsed)) {
         throw new Error('forma invalida');
       }
-      mostrarModal('Esto sobrescribirá los datos actuales con el archivo importado. ¿Continuar?', () => {
-        ligaState = parsed;
-        guardarEstado();
-        render();
+      const nombre = nombreLigaDesdeArchivo(file.name);
+      mostrarModal(`El archivo se añadirá como una liga nueva ("${nombre}") sin tocar las que ya tienes. ¿Continuar?`, () => {
+        crearLiga(nombre, parsed);
       });
     } catch (err) {
       alert('El archivo no tiene un formato válido de liga.');
@@ -1144,8 +1403,8 @@ async function compartirEnlace() {
 }
 
 // Al cargar la página con un hash "#liga=...": descomprime, valida con la
-// MISMA validación de forma que importarJSON, y pregunta antes de sustituir
-// el estado actual. El hash se limpia SIEMPRE (enlace válido o no, se acepte
+// MISMA validación de forma que importarJSON, y pregunta antes de añadir la
+// liga del enlace a la lista (no sustituye a ninguna). El hash se limpia SIEMPRE (enlace válido o no, se acepte
 // o se cancele) para que un refresco de página no vuelva a disparar la
 // importación ni deje el enlace "colgado" en la barra de direcciones.
 async function manejarHashCompartido() {
@@ -1167,10 +1426,8 @@ async function manejarHashCompartido() {
   }
 
   limpiarHash();
-  mostrarModal('¿Importar la liga del enlace? Sustituirá a la actual.', () => {
-    ligaState = estado;
-    guardarEstado();
-    render();
+  mostrarModal('¿Importar la liga del enlace? Se añadirá como una liga nueva sin tocar las que ya tienes.', () => {
+    crearLiga('Liga importada', estado);
   });
 }
 
@@ -1200,6 +1457,13 @@ function init() {
     if (!btn) return;
     activarTab(btn.dataset.tab);
   });
+
+  document.getElementById('selector-liga').addEventListener('change', (e) => {
+    activarLiga(e.target.value);
+  });
+  document.getElementById('btn-liga-nueva').addEventListener('click', nuevaLiga);
+  document.getElementById('btn-liga-renombrar').addEventListener('click', renombrarLigaActiva);
+  document.getElementById('btn-liga-eliminar').addEventListener('click', eliminarLigaActiva);
 
   document.getElementById('btn-agregar-fila').addEventListener('click', agregarFila);
   document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);

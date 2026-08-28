@@ -164,13 +164,68 @@ export/import y el enlace de la Fase 2.
 **Modelo:** Opus (toca la capa de persistencia y todos los caminos de render).
 **Paralelizable:** no.
 
-- [ ] Fase 3 ejecutada
-- [ ] Diff revisado a mano por Fable
-- [ ] Verificada en navegador (criterios a–e)
+- [x] Fase 3 ejecutada
+- [x] Diff revisado a mano por Fable
+- [x] Verificada en navegador (criterios a–e; migración comprobada con estado
+      plano real sembrado, capturas escritorio y 390px revisadas)
 
 ---
 
-## Fase 4 — Ficha por jugador
+## Fase 4 — Enlaces de solo lectura (añadida 2026-08-28)
+
+Decisión del usuario tras probar el enlace de la Fase 2: cada receptor obtiene una
+copia editable, y solo la del admin "vale". Para el grupo se comparte un enlace de
+**solo consulta**. Es una barrera de usabilidad, no de seguridad (sigue sin haber
+backend): evita ediciones accidentales, no ediciones malintencionadas.
+
+**Diseño cerrado:**
+- El botón "Compartir enlace" pasa a abrir un modal con dos opciones:
+  **"Solo lectura (para el grupo)"** genera `#ver=<datos>` y **"Copia completa
+  (editable)"** genera el `#liga=<datos>` actual de la Fase 2. Misma compresión y
+  payload en ambos; solo cambia el prefijo del hash.
+- Al cargar con `#ver=`: la app entra en **modo consulta** sin tocar el estado
+  guardado — la liga del enlace se carga en memoria, NO se guarda en localStorage,
+  NO crea liga en la lista, y el hash NO se limpia (así el receptor puede recargar
+  o reenviar la URL y sigue funcionando).
+- En modo consulta: banner fijo visible "Modo consulta — liga compartida por
+  enlace" bajo la cabecera; solo se muestran las pestañas Jornadas y Clasificación
+  (Jugadores y el selector/acciones de ligas ocultos); TODOS los caminos de
+  edición desactivados: inputs de sets deshabilitados (o valores como texto),
+  sin botón "Partido completado", sin Generar/Exportar/Importar/Compartir ni
+  gestión de ligas. Colapsar jornadas y "Sacar imagen" SÍ siguen activos (son de
+  consulta). Un hash `#ver=` corrupto muestra el mismo error que la Fase 2 y cae
+  a la app normal.
+- Patrón `[hidden]` obligatorio para el banner/elementos nuevos; `textContent`
+  para todo dato de usuario.
+- `README.md`: actualizar la sección "Compartir por enlace" con los dos tipos.
+
+**Contrato**
+1. **Entregable:** cambios en `app.js`, `index.html`, `style.css`, `README.md`.
+2. **Formato:** el descrito. Sin librerías.
+3. **Aceptación:** con `browse` y servidor local: (a) generar enlace `#ver=` de una
+   liga con resultados y abrirlo en pestaña limpia muestra jornadas y clasificación
+   correctas con el banner de modo consulta; (b) en modo consulta el DOM no
+   contiene ningún input editable habilitado ni botones de
+   generar/exportar/importar/compartir/gestión de ligas (comprobación programática
+   sobre el DOM); (c) recargar la página en modo consulta mantiene la vista;
+   (d) el localStorage del receptor queda EXACTAMENTE igual que antes de abrir el
+   enlace; (e) el enlace `#liga=` de la Fase 2 sigue funcionando igual;
+   (f) `#ver=` corrupto → error y app normal utilizable; (g) "Sacar imagen"
+   funciona en modo consulta; (h) `git diff` no toca algoritmo ni clasificación.
+4. **Prohibido:** tocar el algoritmo, la clasificación, el formato de los payloads
+   comprimidos, la clave de localStorage, `vendor/`; `git commit`/`git push`.
+5. **Sin background:** (cláusula fija).
+
+**Modelo:** Sonnet (diseño cerrado; ojo en revisión a caminos de edición que se
+escapen). **Paralelizable:** no.
+
+- [ ] Fase 4 ejecutada
+- [ ] Diff revisado a mano por Fable (checklist de TODOS los controles de edición)
+- [ ] Verificada en navegador (criterios a–h)
+
+---
+
+## Fase 5 — Ficha por jugador
 
 **Diseño cerrado:**
 - Pulsar el nombre de un jugador en la clasificación abre un modal-ficha con:
@@ -195,13 +250,13 @@ export/import y el enlace de la Fase 2.
 
 **Modelo:** Sonnet. **Paralelizable:** no (comparte los 3 ficheros).
 
-- [ ] Fase 4 ejecutada
+- [ ] Fase 5 ejecutada
 - [ ] Diff revisado a mano por Fable (incluye inspección del PNG real)
 - [ ] Verificada en navegador (criterios a–d)
 
 ---
 
-## Fase 5 — PWA instalable (sin backend)
+## Fase 6 — PWA instalable (sin backend)
 
 **Diseño cerrado:**
 - `manifest.json` (nombre "Liga Mutxo Padel", display standalone, theme `#0a0e1a`),
@@ -228,7 +283,7 @@ export/import y el enlace de la Fase 2.
 **Modelo:** Sonnet. **Paralelizable:** en principio no (toca `index.html`/`app.js`);
 se ejecuta la última.
 
-- [ ] Fase 5 ejecutada
+- [ ] Fase 6 ejecutada
 - [ ] Diff revisado a mano por Fable
 - [ ] Verificada (criterios a–c) y desplegada en GitHub Pages
 
