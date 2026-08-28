@@ -6,6 +6,11 @@
 
 const STORAGE_KEY = 'padel-liga-mutxo-v1';
 
+// Los nombres internos girls/boys, girlIdx/boyIdx y los ids g<idx>/b<idx> son
+// legado del modelo mixto original de la liga (dos columnas por género). La
+// UI ya no muestra esa semántica ("Columna 1"/"Columna 2"), pero estos
+// nombres se conservan tal cual por compatibilidad con el estado guardado en
+// localStorage y con los JSON ya exportados — cambiarlos rompería ambos.
 function estadoInicial() {
   return {
     girls: Array(8).fill(''),
@@ -402,9 +407,14 @@ function repararEquidad(agrupamientos, n) {
 // cualquier n), se generan varios calendarios candidatos completos y se
 // devuelve el de mayor cobertura de rivalidad — acotado a
 // CANDIDATOS_CALENDARIO intentos, siempre converge.
+// Nota de extensión futura (sin implementar): un hipotético modo de "parejas
+// fijas" (la pareja se decide una vez, no cada jornada) necesitaría un
+// generador de calendario distinto — round-robin directo entre las parejas
+// ya formadas, no entre personas de columnas separadas — y una clasificación
+// por pareja en vez de por persona. Ver el detalle en README.md.
 function generarCalendario(numGirls = 8, numBoys = 8) {
   if (numGirls !== numBoys) {
-    throw new Error('generarCalendario requiere el mismo número de chicas y chicos.');
+    throw new Error('generarCalendario requiere el mismo número de personas en cada columna.');
   }
   const n = numGirls;
   const coberturaMaxima = (n * (n - 1)) / 2 /* GG */ + (n * (n - 1)) / 2 /* BB */ + n * n /* GB */;
@@ -666,8 +676,8 @@ function renderColumnaJugadores(contenedorId, lista, campo) {
 }
 
 function nombrePareja(pareja) {
-  const girl = ligaState.girls[pareja.girlIdx] || `Girl ${pareja.girlIdx + 1}`;
-  const boy = ligaState.boys[pareja.boyIdx] || `Boy ${pareja.boyIdx + 1}`;
+  const girl = ligaState.girls[pareja.girlIdx] || `Columna 1 · ${pareja.girlIdx + 1}`;
+  const boy = ligaState.boys[pareja.boyIdx] || `Columna 2 · ${pareja.boyIdx + 1}`;
   return `${girl} / ${boy}`;
 }
 
@@ -924,7 +934,7 @@ function eliminarFila(idx) {
 function generarLiga() {
   if (!nombresCompletos()) {
     const total = ligaState.girls.length + ligaState.boys.length;
-    alert(`Rellena los ${total} nombres (${ligaState.girls.length} chicas y ${ligaState.boys.length} chicos) antes de generar la liga.`);
+    alert(`Rellena los ${total} nombres (${ligaState.girls.length} en la Columna 1 y ${ligaState.boys.length} en la Columna 2) antes de generar la liga.`);
     return;
   }
 

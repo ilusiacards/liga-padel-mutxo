@@ -1,6 +1,6 @@
 # Liga Mutxo Padel
 
-App web 100% estática (sin framework, sin build, sin backend) para gestionar la liga de pádel mixto entre "Mutxo Girls" y "Mutxo Boys".
+App web 100% estática (sin framework, sin build, sin backend) para gestionar la liga de pádel entre dos columnas de jugadores.
 
 ## Cómo abrir
 
@@ -8,8 +8,8 @@ Haz doble clic en `index.html` (o ábrelo desde el navegador con `Archivo > Abri
 
 ## Cómo generar la liga
 
-1. Ve a la pestaña **Jugadores** y escribe los 8 nombres de "Mutxo Girls" y los 8 de "Mutxo Boys".
-2. Pulsa **Generar Liga**. Se crearán 8 jornadas con 4 partidos cada una, donde cada chica juega exactamente una vez con cada chico.
+1. Ve a la pestaña **Jugadores** y escribe los 8 nombres de la Columna 1 y los 8 de la Columna 2.
+2. Pulsa **Generar Liga**. Se crearán 8 jornadas con 4 partidos cada una: cada persona de la Columna 1 juega cada jornada con una de la Columna 2, sin repetir compañero.
 3. Si ya existía una liga generada, se pedirá confirmación antes de borrar los resultados actuales.
 
 ## Cómo introducir resultados
@@ -45,3 +45,15 @@ localStorage.removeItem('padel-liga-mutxo-v1');
 ```
 
 Luego recarga la página.
+
+## Extensión futura: modo "parejas fijas" (no implementado)
+
+El modo actual forma la pareja de cada jugador de nuevo en cada jornada (sin
+repetir compañero). Un hipotético modo alternativo de "parejas fijas" —donde
+la pareja se decide una única vez y se mantiene toda la liga— necesitaría, al
+menos: (1) un paso previo de emparejamiento persona-a-persona entre columna 1
+y columna 2 antes de generar el calendario; (2) un generador de calendario
+distinto, tipo round-robin directo entre las parejas ya formadas (en vez de
+entre personas de columnas separadas); y (3) una clasificación calculada por
+pareja en vez de por persona. No hay código de este modo en la app; queda
+anotado aquí como referencia si se decide implementarlo más adelante.
