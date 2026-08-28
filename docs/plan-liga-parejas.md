@@ -251,9 +251,11 @@ escapen). **Paralelizable:** no.
 
 **Modelo:** Sonnet. **Paralelizable:** no (comparte los 3 ficheros).
 
-- [ ] Fase 5 ejecutada
-- [ ] Diff revisado a mano por Fable (incluye inspección del PNG real)
-- [ ] Verificada en navegador (criterios a–d)
+- [x] Fase 5 ejecutada
+- [x] Diff revisado a mano por Fable (incluye inspección de la captura real)
+- [x] Verificada en navegador (números idénticos a la tabla, historial 14/14,
+      evolución termina en la posición actual, storage intacto, ficha operativa
+      también en modo consulta)
 
 ---
 

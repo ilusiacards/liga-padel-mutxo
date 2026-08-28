@@ -88,6 +88,18 @@ importar esa liga; al aceptar se añade como una liga nueva ("Liga importada")
 y no sustituye a ninguna de las que ya tengas en ese navegador. Un enlace
 `#ver=` (solo lectura) no pregunta nada: entra directamente en modo consulta.
 
+## Ficha de jugador
+
+En la pestaña **Clasificación**, el nombre de cada jugador es clicable: al pulsarlo se abre su **ficha**, con:
+
+- **Cabecera**: nombre y posición actual en la clasificación.
+- **Resumen**: PJ, PG, PP, sets y juegos a favor/en contra y puntos — los mismos números que su fila de la tabla.
+- **Historial de partidos**: solo los completados, ordenados por jornada, con el compañero de ese partido, la pareja rival, el marcador por sets y si lo ganó o lo perdió.
+- **Pendientes**: con quién aún no ha jugado como pareja y contra quién aún no se ha enfrentado como rival, recorriendo todo el calendario generado (jugado o no). Si ya coincidió con todo el mundo, se muestra "Nadie pendiente".
+- **Evolución de posición**: la posición en la clasificación acumulada jornada a jornada (solo las jornadas con algún partido ya completado), en formato compacto ("J1: 3º · J2: 2º · …").
+
+La ficha es solo de consulta (no cambia ningún resultado ni guarda nada) y funciona igual en modo consulta (`#ver=`). Tiene su propio botón **Sacar imagen** para descargarla como PNG. Se cierra con el botón **Cerrar** o pulsando fuera del cuadro.
+
 ## Reiniciar desde cero
 
 Todas las ligas se guardan en `localStorage` bajo la clave `padel-liga-mutxo-v1`. Para borrar **todas** y empezar de nuevo, abre las herramientas de desarrollador del navegador (F12), ve a la pestaña Aplicación/Storage, y elimina esa clave de `localStorage` — o ejecuta en la consola:

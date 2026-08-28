@@ -451,6 +451,36 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   font-weight: 600;
 }
 
+/* Nombre de jugador clicable en la clasificación (Fase 5: abre la ficha). Es
+   un <button> real (accesible por teclado sin roles/tabindex extra), con
+   estilo sutil que solo se remarca al pasar el ratón o al enfocar. */
+.nombre-jugador-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color 150ms, text-decoration-color 150ms;
+}
+
+.nombre-jugador-btn:hover,
+.nombre-jugador-btn:focus-visible {
+  color: var(--secondary);
+  text-decoration-color: var(--secondary);
+}
+
+.nombre-jugador-btn:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
 .col-puntos {
   background: rgba(232, 151, 58, 0.12);
 }
@@ -520,6 +550,94 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
 }
 
 .modal-compartir-opciones .btn { width: 100%; }
+
+/* Ficha de jugador (Fase 5): reutiliza .modal-overlay/.modal, así que ya
+   hereda el par .modal-overlay[hidden] de arriba. Solo amplía el ancho y
+   añade scroll interno propio, porque el contenido puede ser largo con
+   muchas jornadas. */
+.modal-ficha {
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.ficha-cabecera { margin-bottom: var(--space-3); }
+.ficha-nombre { font-size: 1.4rem; }
+.ficha-posicion { color: var(--muted); margin: 4px 0 0; font-weight: 600; }
+
+.ficha-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.ficha-stat {
+  background: var(--surface-elevada);
+  border-radius: var(--radius-input);
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.ficha-stat-valor {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.ficha-stat-etiqueta {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.ficha-seccion { margin-bottom: var(--space-3); }
+.ficha-seccion h3 { font-size: 1rem; margin-bottom: var(--space-1); }
+
+.ficha-vacio { color: var(--muted); font-size: 0.9rem; }
+
+.ficha-historial-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ficha-historial-item {
+  background: var(--surface-elevada);
+  border-radius: var(--radius-input);
+  padding: 8px 10px;
+  border-left: 4px solid var(--muted);
+}
+
+.ficha-historial-item.ganado { border-left-color: var(--success); }
+.ficha-historial-item.perdido { border-left-color: var(--destructive); }
+
+.ficha-historial-cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-1);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ficha-historial-resultado { color: var(--muted); }
+.ficha-historial-item.ganado .ficha-historial-resultado { color: var(--success); }
+.ficha-historial-item.perdido .ficha-historial-resultado { color: var(--destructive); }
+
+.ficha-historial-detalle { margin: 4px 0 0; font-size: 0.85rem; }
+.ficha-historial-marcador { margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+.ficha-pendientes-bloque { margin-bottom: var(--space-1); }
+.ficha-pendientes-titulo { margin: 0; font-weight: 600; font-size: 0.85rem; }
+.ficha-pendientes-lista { margin: 2px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+.ficha-evolucion-lista { margin: 0; font-size: 0.9rem; color: var(--text); }
 
 /* Loading (generación de liga) */
 .loading-overlay {
@@ -631,6 +749,10 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   .ligas-acciones .btn-mini {
     flex: 1;
     padding: 6px 4px;
+  }
+
+  .ficha-resumen {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   h1 { font-size: 1.4rem; }
