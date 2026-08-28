@@ -133,15 +133,30 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
 
 .banner-modo-consulta[hidden] { display: none; }
 
-/* App de jugador (jugador.html): línea discreta con la fecha de la última
-   publicación, bajo el título. */
+/* App de jugador (jugador.html): fila bajo el título con la fecha de la
+   última publicación y el botón "Actualizar". flex-wrap + margin-left:auto
+   en el botón para que, en móvil estrecho, la fecha larga baje de línea en
+   vez de desbordar junto al botón. */
+.actualizado-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  margin-top: var(--space-1);
+}
+
 .actualizado-jugador {
-  margin: var(--space-1) 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
 }
 
 .actualizado-jugador[hidden] { display: none; }
+
+#btn-actualizar-jugador {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
 
 /* App de jugador: mensajes de estado (cargando, liga no publicada, sin
    conexión). La página de jugador no tiene modales de aviso: el mensaje se
@@ -324,6 +339,13 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   margin-bottom: var(--space-3);
   text-align: center;
 }
+
+.acciones-jornadas {
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+.acciones-jornadas[hidden] { display: none; }
 
 .jornada-toggle {
   color: var(--muted);

@@ -1998,6 +1998,10 @@ function activarModoConsulta() {
   document.getElementById('banner-modo-consulta').hidden = false;
   document.querySelector('.tab-btn[data-tab="jugadores"]').hidden = true;
   document.getElementById('ligas-barra').hidden = true;
+  // Pestaña Jugadores oculta, pero Jornadas sí se ve en consulta — y ahí
+  // vive ahora #btn-publicar (Remate). ?. porque jugador.html no tiene esta
+  // fila (misma función no se llama ahí, pero por si el selector cambia).
+  document.querySelector('.acciones-jornadas')?.setAttribute('hidden', '');
   activarTab('jornadas');
   render();
 }
@@ -2139,6 +2143,7 @@ function initJugador() {
   modoConsulta = true;
 
   registrarListenersComunes();
+  registrarListenersJugador();
   registrarServiceWorker();
 
   cargarLigaOficial();
@@ -2189,6 +2194,26 @@ function registrarListenersAdmin() {
     const file = e.target.files[0];
     if (file) importarJSON(file);
     e.target.value = '';
+  });
+}
+
+// Botón "Actualizar" de jugador.html, junto a la línea "Actualizado: …":
+// fuerza una nueva descarga de liga-oficial.json sin recargar la página.
+// cargarLigaOficial() ya gestiona los mensajes de error y repinta la fecha;
+// aquí solo se cuida el estado visual del botón, siempre restaurado al
+// terminar (éxito o error) con try/finally.
+function registrarListenersJugador() {
+  const btnActualizar = document.getElementById('btn-actualizar-jugador');
+  const textoOriginal = btnActualizar.textContent;
+  btnActualizar.addEventListener('click', async () => {
+    btnActualizar.disabled = true;
+    btnActualizar.textContent = 'Actualizando…';
+    try {
+      await cargarLigaOficial();
+    } finally {
+      btnActualizar.disabled = false;
+      btnActualizar.textContent = textoOriginal;
+    }
   });
 }
 

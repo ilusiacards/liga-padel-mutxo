@@ -35,11 +35,12 @@ propio sitio, así que en cuanto el administrador publica una versión nueva, to
 la ven al abrir la app (no hay que reinstalar nada). Si en ese momento no hay red,
 muestra la última liga que se descargó; si no se ha llegado a descargar ninguna,
 avisa de que hace falta internet. Bajo el título aparece la línea
-"Actualizado: …" con la fecha de la última publicación.
+"Actualizado: …" con la fecha de la última publicación, junto al botón
+**Actualizar**, que fuerza esa misma descarga al momento sin recargar la página.
 
 ### Publicar resultados (admin)
 
-En la pestaña **Jugadores** de la app de gestión, junto a "Compartir enlace",
+En la parte superior de la pestaña **Jornadas** de la app de gestión,
 el botón **Publicar resultados** sube la liga activa como `liga-oficial.json`
 a la raíz del repo — el "tablón oficial" que `jugador.html` descarga. El
 contenido es exactamente el del export (`girls`, `boys`, `jornadas`,

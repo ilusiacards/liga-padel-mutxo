@@ -184,14 +184,57 @@ queda especificada). **Paralelizable:** no.
 - [x] Verificada (criterios a–g; 401 probado contra la API real con token falso;
       de propina, verificado el flujo de actualización del SW v2→v3: una recarga
       por detrás, como es esperable en PWA)
-- [ ] Publicación real de prueba hecha (admin) y jugador.html reflejándola
+- [x] Publicación real de prueba hecha (admin) y jugador.html reflejándola —
+      confirmado por el usuario en móvil real (2026-08-28): "ha ido todo bien"
 
 ---
 
+## Remate — Botón "Actualizar" (jugador) y "Publicar" a Jornadas (admin) (pedido 2026-08-28)
+
+Evitar tener que cerrar y abrir la app de jugador para ver resultados nuevos;
+y en el admin, publicar desde donde realmente se cambian los resultados.
+
+**Diseño cerrado (parte admin):**
+- MOVER el botón `#btn-publicar` de la fila `.acciones-datos` (pestaña
+  Jugadores) a la parte superior de la pestaña **Jornadas** de `index.html`,
+  en una fila propia `.acciones-jornadas` con el mismo patrón que
+  `.acciones-clasificacion` (botón alineado igual que "Sacar imagen" en
+  Clasificación). Mismo id y mismo handler — `registrarListenersAdmin()` no
+  cambia. El resto de botones (Exportar/Importar/Compartir) se quedan donde
+  están.
+
+**Diseño cerrado (parte jugador):**
+- Botón "Actualizar" en la cabecera de `jugador.html`, junto a la línea
+  "Actualizado:" (estilo `.btn .btn-secondary .btn-mini` ya existente).
+- Al pulsarlo: botón deshabilitado con texto "Actualizando…" → llama a
+  `cargarLigaOficial()` (que ya gestiona mensajes de error y repinta la fecha)
+  → al terminar (bien o mal) restaura el botón. `cargarLigaOficial` ya usa
+  `cache: 'no-store'` y el SW es red-primero para ese JSON: no hay más que
+  hacer para que traiga lo último publicado.
+- `sw.js`: **CACHE a `liga-mutxo-v4`** (cambian jugador.html/app.js — regla).
+- Nada de "consulta" en textos. Solo `jugador.html`, `app.js` (mínimo),
+  `style.css` si hace falta, `sw.js`, y una línea en README.
+
+**Contrato:** entregable: `jugador.html`, `index.html`, `app.js` (mínimo),
+`style.css` si hace falta, `sw.js`, README. Aceptación: (a) pulsar Actualizar
+tras cambiar el JSON servido refresca datos y fecha sin recargar la página;
+(b) durante la carga el botón queda deshabilitado y luego se restaura; (c) con
+404/sin red se muestran los mensajes existentes y el botón se restaura;
+(d) `CACHE` es v4; (e) en `index.html`, `#btn-publicar` está en la pestaña
+Jornadas (fila `.acciones-jornadas`) y ya no en `.acciones-datos`, y el flujo
+de publicar sigue funcionando (modal de token/confirmación); (f) el resto del
+admin intacto. Prohibido: tocar algoritmo/clasificación/formatos/`vendor/`;
+`git commit`/`push`. Sin background (cláusula fija). **Modelo:** Sonnet.
+
+- [x] Remate ejecutado, revisado, verificado y desplegado — 1 devolución al
+      agente (NO PASA: Publicar quedaba visible en el modo consulta de index
+      al mudarse a Jornadas; corregido ocultando `.acciones-jornadas` en
+      `activarModoConsulta()` + par `[hidden]`)
+
 ## Cierre del plan
 
-- [ ] Ambas fases verificadas, pusheadas y desplegadas
-- [ ] Memoria del proyecto actualizada (app de jugador, flujo de publicación,
-      claves nuevas de localStorage, regla de caché aplicada v2→v3)
-- [ ] Retirar este doc (`git rm docs/plan-modo-jugador.md` + commit) tras
+- [x] Ambas fases + remate verificados, pusheados y desplegados
+- [x] Memoria del proyecto actualizada (app de jugador, flujo de publicación,
+      claves nuevas de localStorage, regla de caché aplicada v2→v4)
+- [x] Retirar este doc (`git rm docs/plan-modo-jugador.md` + commit) tras
       comprobar por grep que nada lo referencia
