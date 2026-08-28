@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Liga Mutxo Padel</title>
+<link rel="manifest" href="manifest-jugador.json" />
+<meta name="theme-color" content="#0a0e1a" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-pagina="jugador">
+  <header class="app-header">
+    <h1>Liga Mutxo Padel</h1>
+    <p id="actualizado-jugador" class="actualizado-jugador" hidden></p>
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="jornadas">Jornadas</button>
+      <button class="tab-btn" data-tab="clasificacion">Clasificación</button>
+    </nav>
+  </header>
+
+  <p id="mensaje-jugador" class="mensaje-jugador">Cargando la liga…</p>
+
+  <main class="app-main">
+    <section id="tab-jornadas" class="tab-section active">
+      <div id="jornadas-container"></div>
+      <!-- Empieza oculto: mientras se descarga la liga publicada (o si no hay
+           ninguna) el mensaje que manda es el de #mensaje-jugador. A partir de
+           renderJornadas() la visibilidad la lleva su style.display. -->
+      <p id="jornadas-vacio" class="mensaje-vacio" hidden>Todavía no hay jornadas en la liga publicada.</p>
+    </section>
+
+    <section id="tab-clasificacion" class="tab-section">
+      <div class="acciones-clasificacion">
+        <button id="btn-imagen-clasificacion" class="btn btn-secondary">Sacar imagen</button>
+      </div>
+      <div class="tabla-wrapper" id="clasificacion-capturable">
+        <table class="tabla-clasificacion">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Jugador</th>
+              <th>PJ</th>
+              <th>PG</th>
+              <th>Sets G</th>
+              <th>Sets P</th>
+              <th>Jueg G</th>
+              <th>Jueg P</th>
+              <th class="col-puntos">Puntos</th>
+            </tr>
+          </thead>
+          <tbody id="clasificacion-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-ficha-overlay" class="modal-overlay" hidden>
+    <div class="modal modal-ficha" id="modal-ficha">
+      <div id="modal-ficha-cuerpo" class="modal-ficha-cuerpo"></div>
+      <div class="modal-acciones">
+        <button id="modal-ficha-imagen" class="btn btn-secondary no-captura">Sacar imagen</button>
+        <button id="modal-ficha-cerrar" class="btn btn-primary no-captura">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/html2canvas.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

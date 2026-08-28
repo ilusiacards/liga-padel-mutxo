@@ -133,6 +133,30 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
 
 .banner-modo-consulta[hidden] { display: none; }
 
+/* App de jugador (jugador.html): línea discreta con la fecha de la última
+   publicación, bajo el título. */
+.actualizado-jugador {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.actualizado-jugador[hidden] { display: none; }
+
+/* App de jugador: mensajes de estado (cargando, liga no publicada, sin
+   conexión). La página de jugador no tiene modales de aviso: el mensaje se
+   escribe aquí, bajo la cabecera. */
+.mensaje-jugador {
+  max-width: 960px;
+  margin: 0 auto var(--space-1);
+  padding: 10px var(--space-2);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.mensaje-jugador[hidden] { display: none; }
+
 .app-main {
   max-width: 960px;
   margin: 0 auto;

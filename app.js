@@ -51,6 +51,9 @@ let ligaState = estadoInicial();
 // la variable que activa todas las salvaguardas de solo lectura: bloquea
 // guardarEstado() (ver más abajo) y hace que render()/crearInputSet()/
 // crearPartidoCard() no generen ningún camino de edición.
+//
+// `jugador.html` (app de jugador) reutiliza EXACTAMENTE estas salvaguardas:
+// la activa al arrancar y nunca la desactiva (ver initJugador()).
 let modoConsulta = false;
 
 function crearIdLiga() {
@@ -1854,39 +1857,145 @@ function activarTab(nombreTab) {
 }
 
 /* ============================================================
+   APP DE JUGADOR (`jugador.html`)
+
+   Misma app, misma lógica: `jugador.html` carga este mismo `app.js` con
+   `<body data-pagina="jugador">` y lo único que cambia es el arranque —
+   modo consulta desde el primer instante (todas las salvaguardas de la
+   Fase 4) y, en vez de leer localStorage, se descarga la liga que el admin
+   ha publicado en `liga-oficial.json` dentro del propio sitio.
+
+   Aquí NO se toca en ningún momento la clave `padel-liga-mutxo-v1`: no se
+   llama a cargarEstado() y guardarEstado() está cortado por modoConsulta,
+   así que las ligas del admin (si este navegador es también el suyo) quedan
+   intactas byte a byte.
+   ============================================================ */
+
+const ARCHIVO_LIGA_OFICIAL = 'liga-oficial.json';
+
+// Mensajes de la página de jugador. No hay modales de aviso en esta página:
+// se escribe en un párrafo fijo bajo la cabecera, siempre con textContent.
+function mostrarMensajeJugador(texto) {
+  const el = document.getElementById('mensaje-jugador');
+  if (!el) return;
+  el.textContent = texto;
+  el.hidden = false;
+}
+
+function ocultarMensajeJugador() {
+  const el = document.getElementById('mensaje-jugador');
+  if (el) el.hidden = true;
+}
+
+// "Actualizado: <fecha legible>" a partir del campo opcional `publicadoEl`
+// (ISO) del JSON publicado. Si el campo no viene o no es una fecha válida,
+// la línea sencillamente no se muestra.
+function mostrarFechaPublicacion(publicadoEl) {
+  const linea = document.getElementById('actualizado-jugador');
+  if (!linea) return;
+  if (typeof publicadoEl !== 'string' || !publicadoEl) return;
+  const fecha = new Date(publicadoEl);
+  if (Number.isNaN(fecha.getTime())) return;
+  linea.textContent = `Actualizado: ${fecha.toLocaleString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })}`;
+  linea.hidden = false;
+}
+
+// Descarga la liga publicada por el admin y la pinta. `cache: 'no-store'`
+// para que el navegador no sirva una versión vieja de su propia caché HTTP;
+// del respaldo offline se encarga el service worker (red primero con
+// fallback a la copia cacheada), así que un fallo de red aquí significa que
+// no hay red Y no hay copia guardada.
+async function cargarLigaOficial() {
+  let respuesta;
+  try {
+    respuesta = await fetch(ARCHIVO_LIGA_OFICIAL, { cache: 'no-store' });
+  } catch (err) {
+    console.warn('No se ha podido descargar la liga publicada.', err);
+    mostrarMensajeJugador('Sin conexión. Vuelve a intentarlo con internet.');
+    return;
+  }
+
+  if (respuesta.status === 404) {
+    mostrarMensajeJugador('El administrador aún no ha publicado la liga.');
+    return;
+  }
+
+  let estado;
+  try {
+    if (!respuesta.ok) throw new Error(`respuesta ${respuesta.status}`);
+    estado = await respuesta.json();
+    // formaValidaLiga solo exige girls/boys/jornadas: el campo extra
+    // `publicadoEl` que añade la publicación pasa sin problema.
+    if (!formaValidaLiga(estado)) throw new Error('forma invalida');
+  } catch (err) {
+    console.warn('La liga publicada no se ha podido leer.', err);
+    mostrarMensajeJugador('La liga publicada no se ha podido leer.');
+    return;
+  }
+
+  ligaState = normalizarLiga(estado);
+  ocultarMensajeJugador();
+  mostrarFechaPublicacion(estado.publicadoEl);
+  render();
+}
+
+/* ============================================================
    INICIALIZACIÓN
+
+   Dos arranques distintos sobre el MISMO código: `index.html` (admin) e
+   `jugador.html`. Los listeners se registran por página — cada bloque solo
+   se llama desde la página cuyos elementos existen — en vez de sembrar
+   null-checks por todas partes.
    ============================================================ */
 
 function init() {
+  if (document.body.dataset.pagina === 'jugador') {
+    initJugador();
+    return;
+  }
+  initAdmin();
+}
+
+// Arranque de `index.html`: el de siempre.
+function initAdmin() {
   cargarEstado();
   render();
 
+  registrarListenersComunes();
+  registrarListenersAdmin();
+
+  manejarHashCompartido();
+  registrarServiceWorker();
+}
+
+// Arranque de `jugador.html`: solo lectura desde el primer instante y la
+// liga viene de `liga-oficial.json`, no de localStorage.
+function initJugador() {
+  modoConsulta = true;
+
+  registrarListenersComunes();
+  registrarServiceWorker();
+
+  cargarLigaOficial();
+}
+
+// Listeners de elementos que existen en las DOS páginas.
+function registrarListenersComunes() {
   document.getElementById('tab-nav').addEventListener('click', (e) => {
     const btn = e.target.closest('.tab-btn');
     if (!btn) return;
     activarTab(btn.dataset.tab);
   });
 
-  document.getElementById('selector-liga').addEventListener('change', (e) => {
-    activarLiga(e.target.value);
-  });
-  document.getElementById('btn-liga-nueva').addEventListener('click', nuevaLiga);
-  document.getElementById('btn-liga-renombrar').addEventListener('click', renombrarLigaActiva);
-  document.getElementById('btn-liga-eliminar').addEventListener('click', eliminarLigaActiva);
-
-  document.getElementById('btn-agregar-fila').addEventListener('click', agregarFila);
-  document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
-  document.getElementById('loading-aceptar').addEventListener('click', ocultarGenerando);
-  document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
-  document.getElementById('btn-compartir').addEventListener('click', compartirEnlace);
   document.getElementById('btn-imagen-clasificacion').addEventListener('click', () => {
     const fecha = new Date().toISOString().slice(0, 10);
     capturarImagen(document.getElementById('clasificacion-capturable'), `clasificacion-padel-mutxo-${fecha}`);
-  });
-  document.getElementById('input-importar').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) importarJSON(file);
-    e.target.value = '';
   });
 
   // Ficha de jugador (Fase 5): botón "Cerrar" y clic fuera del cuadro (el
@@ -1900,12 +2009,33 @@ function init() {
     const nombre = nombrePersona(fichaAbiertaPersonId);
     capturarImagen(document.getElementById('modal-ficha'), `ficha-${slugArchivo(nombre)}-padel-mutxo`);
   });
+}
 
-  manejarHashCompartido();
+// Listeners de los controles de gestión, que solo existen en `index.html`.
+function registrarListenersAdmin() {
+  document.getElementById('selector-liga').addEventListener('change', (e) => {
+    activarLiga(e.target.value);
+  });
+  document.getElementById('btn-liga-nueva').addEventListener('click', nuevaLiga);
+  document.getElementById('btn-liga-renombrar').addEventListener('click', renombrarLigaActiva);
+  document.getElementById('btn-liga-eliminar').addEventListener('click', eliminarLigaActiva);
 
-  // PWA (Fase 6): solo se registra el service worker cuando la app se sirve
-  // por https o localhost. Por file:// (doble clic) no se registra nada y
-  // todo sigue funcionando exactamente igual que antes.
+  document.getElementById('btn-agregar-fila').addEventListener('click', agregarFila);
+  document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
+  document.getElementById('loading-aceptar').addEventListener('click', ocultarGenerando);
+  document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
+  document.getElementById('btn-compartir').addEventListener('click', compartirEnlace);
+  document.getElementById('input-importar').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) importarJSON(file);
+    e.target.value = '';
+  });
+}
+
+// PWA (Fase 6): solo se registra el service worker cuando la app se sirve
+// por https o localhost. Por file:// (doble clic) no se registra nada y
+// todo sigue funcionando exactamente igual que antes.
+function registrarServiceWorker() {
   const protocoloValido = location.protocol === 'https:' ||
     location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   if ('serviceWorker' in navigator && protocoloValido) {

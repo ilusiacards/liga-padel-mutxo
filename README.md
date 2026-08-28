@@ -15,6 +15,55 @@ el propio navegador se encarga de guardar los ficheros de la app en caché. Los 
 de tu liga siguen viviendo solo en el navegador (`localStorage`), igual que siempre;
 instalar la app no cambia dónde se guardan ni cómo se comparten.
 
+## App para jugadores
+
+Los jugadores no necesitan la app de gestión: tienen la suya, de solo lectura, en
+
+[`https://ilusiacards.github.io/liga-padel-mutxo/jugador.html`](https://ilusiacards.github.io/liga-padel-mutxo/jugador.html)
+
+Esa es la URL que hay que pasarles. Desde ella el navegador ofrece **Añadir a
+pantalla de inicio** / **Instalar** igual que la app de gestión, y queda como una
+app aparte ("Liga Mutxo Padel") que abre directamente en `jugador.html`.
+
+Qué ven: solo las pestañas **Jornadas** y **Clasificación**, con la ficha de cada
+jugador y los botones **Sacar imagen**. No hay pestaña Jugadores, ni selector de
+ligas, ni botones de generar/exportar/importar/compartir, y los sets salen
+deshabilitados: no pueden tocar nada.
+
+**Se actualiza sola**: cada vez que se abre, descarga `liga-oficial.json` del
+propio sitio, así que en cuanto el administrador publica una versión nueva, todos
+la ven al abrir la app (no hay que reinstalar nada). Si en ese momento no hay red,
+muestra la última liga que se descargó; si no se ha llegado a descargar ninguna,
+avisa de que hace falta internet. Bajo el título aparece la línea
+"Actualizado: …" con la fecha de la última publicación.
+
+### Publicar la liga (mientras no exista el botón)
+
+El "tablón oficial" es el archivo `liga-oficial.json` en la raíz de este repo.
+Hasta que exista el botón **Publicar resultados** en la app de gestión, se sube a
+mano:
+
+1. En la app de gestión, con la liga que quieres publicar activa, pulsa
+   **Exportar Datos**. Se descarga `liga-padel-mutxo-{fecha}.json`.
+2. (Opcional pero recomendado) Abre ese archivo y añade dentro del objeto un
+   campo `publicadoEl` con la fecha y hora en formato ISO, por ejemplo:
+
+   ```json
+   { "publicadoEl": "2026-08-28T19:30:00.000Z", "girls": ["..."], "boys": ["..."], "jornadas": [] }
+   ```
+
+   Es lo que alimenta la línea "Actualizado: …" de la app de jugadores. Si no
+   está, la línea simplemente no se muestra.
+3. Renómbralo a `liga-oficial.json` y súbelo a la **raíz** del repo
+   `ilusiacards/liga-padel-mutxo` en la rama `main` (por la web de GitHub:
+   *Add file → Upload files*, y si ya existe, entrar en el archivo y usar
+   *Edit* para pegar el contenido nuevo).
+4. Un minuto después, GitHub Pages lo sirve y la app de los jugadores ya lo coge.
+
+El formato es exactamente el del export (`girls`, `boys`, `jornadas`,
+`liveGenerated`) más el `publicadoEl` opcional: cualquier otro contenido hace que
+la app de jugadores avise de que no ha podido leer la liga publicada.
+
 ## Cómo generar la liga
 
 1. Ve a la pestaña **Jugadores** y escribe los 8 nombres de la Columna 1 y los 8 de la Columna 2.
