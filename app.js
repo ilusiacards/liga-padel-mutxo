@@ -2034,7 +2034,7 @@ function activarTab(nombreTab) {
    intactas byte a byte.
    ============================================================ */
 
-const ARCHIVO_LIGA_OFICIAL = 'liga-oficial.json';
+const ARCHIVO_LIGA_OFICIAL = '../liga-oficial.json';
 
 // Mensajes de la página de jugador. No hay modales de aviso en esta página:
 // se escribe en un párrafo fijo bajo la cabecera, siempre con textContent.
@@ -2224,7 +2224,12 @@ function registrarServiceWorker() {
   const protocoloValido = location.protocol === 'https:' ||
     location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   if ('serviceWorker' in navigator && protocoloValido) {
-    navigator.serviceWorker.register('sw.js').catch((err) => {
+    // El SW vive en la raíz del sitio. `index.html` lo registra desde ahí
+    // mismo; `jugador/index.html` está una carpeta por debajo y lo registra
+    // con ruta relativa '../sw.js' — sigue siendo válido y el scope por
+    // defecto (la raíz) cubre igualmente `jugador/`.
+    const ruta = document.body.dataset.pagina === 'jugador' ? '../sw.js' : 'sw.js';
+    navigator.serviceWorker.register(ruta).catch((err) => {
       console.warn('No se pudo registrar el service worker:', err);
     });
   }

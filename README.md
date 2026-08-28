@@ -19,11 +19,15 @@ instalar la app no cambia dónde se guardan ni cómo se comparten.
 
 Los jugadores no necesitan la app de gestión: tienen la suya, de solo lectura, en
 
-[`https://ilusiacards.github.io/liga-padel-mutxo/jugador.html`](https://ilusiacards.github.io/liga-padel-mutxo/jugador.html)
+[`https://ilusiacards.github.io/liga-padel-mutxo/jugador/`](https://ilusiacards.github.io/liga-padel-mutxo/jugador/)
 
 Esa es la URL que hay que pasarles. Desde ella el navegador ofrece **Añadir a
 pantalla de inicio** / **Instalar** igual que la app de gestión, y queda como una
-app aparte ("Liga Mutxo Padel") que abre directamente en `jugador.html`.
+app aparte ("Liga Mutxo Padel") con su propio ámbito de instalación (distinto
+del de la app de gestión, así que las dos se pueden instalar a la vez sin que
+Android confunda una con otra). El enlace antiguo,
+`https://ilusiacards.github.io/liga-padel-mutxo/jugador.html`, sigue
+funcionando: redirige automáticamente a `jugador/`.
 
 Qué ven: solo las pestañas **Jornadas** y **Clasificación**, con la ficha de cada
 jugador y los botones **Sacar imagen**. No hay pestaña Jugadores, ni selector de
