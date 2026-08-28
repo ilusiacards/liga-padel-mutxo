@@ -1,6 +1,6 @@
 {
-  "name": "Liga Mutxo Padel",
-  "short_name": "Liga Mutxo Padel",
+  "name": "Liga Mutxo Padel Admin",
+  "short_name": "Liga Mutxo Padel Admin",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
