@@ -36,6 +36,20 @@ La pestaña **Clasificación** se recalcula automáticamente con cada resultado 
 - **Exportar Datos**: descarga un archivo `liga-padel-mutxo-{fecha}.json` con todo el estado de la liga.
 - **Importar Datos**: en otro dispositivo o navegador, usa este botón para cargar el archivo exportado y continuar con los mismos datos. Se pedirá confirmación antes de sobrescribir los datos actuales.
 
+## Compartir por enlace
+
+- El botón **Compartir enlace** (junto a Exportar/Importar Datos) genera una URL que
+  contiene la liga completa comprimida en el propio enlace (nada se sube a ningún
+  servidor) y la copia al portapapeles; el botón muestra brevemente "¡Enlace
+  copiado!" como confirmación.
+- Requiere la versión web publicada en
+  [`https://ilusiacards.github.io/liga-padel-mutxo/`](https://ilusiacards.github.io/liga-padel-mutxo/):
+  si abres `index.html` con doble clic (`file://`), el botón avisa de que hace falta
+  esa versión web, porque un enlace `file://` no se puede compartir ni abrir en otro
+  dispositivo.
+- Al abrir un enlace compartido, la app pregunta si quieres importar esa liga (te
+  pedirá confirmación porque sustituye a la liga que tengas cargada en ese momento).
+
 ## Reiniciar desde cero
 
 Los datos se guardan en `localStorage` bajo la clave `padel-liga-mutxo-v1`. Para borrar todo y empezar de nuevo, abre las herramientas de desarrollador del navegador (F12), ve a la pestaña Aplicación/Storage, y elimina esa clave de `localStorage` — o ejecuta en la consola:

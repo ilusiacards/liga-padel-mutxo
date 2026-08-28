@@ -1022,12 +1022,22 @@ function exportarJSON() {
   URL.revokeObjectURL(url);
 }
 
+// Validación de forma compartida entre importar JSON e importar por enlace:
+// un objeto de liga válido tiene las columnas de nombres y una lista de
+// jornadas (aunque esté vacía).
+function formaValidaLiga(parsed) {
+  return Boolean(parsed) &&
+    Array.isArray(parsed.girls) &&
+    Array.isArray(parsed.boys) &&
+    ('jornadas' in parsed);
+}
+
 function importarJSON(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const parsed = JSON.parse(e.target.result);
-      if (!parsed || !Array.isArray(parsed.girls) || !Array.isArray(parsed.boys) || !('jornadas' in parsed)) {
+      if (!formaValidaLiga(parsed)) {
         throw new Error('forma invalida');
       }
       mostrarModal('Esto sobrescribirá los datos actuales con el archivo importado. ¿Continuar?', () => {
@@ -1040,6 +1050,128 @@ function importarJSON(file) {
     }
   };
   reader.readAsText(file);
+}
+
+/* ============================================================
+   COMPARTIR POR ENLACE (estado comprimido en el fragmento de la URL,
+   sin servidor: CompressionStream/DecompressionStream nativas del
+   navegador + base64url)
+   ============================================================ */
+
+const URL_PUBLICA_LIGA = 'https://ilusiacards.github.io/liga-padel-mutxo/';
+
+// ArrayBuffer -> base64url (sin '+', '/' ni '=', apto para un fragmento de URL).
+function bufferABase64Url(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binario = '';
+  for (let i = 0; i < bytes.length; i++) binario += String.fromCharCode(bytes[i]);
+  const base64 = btoa(binario);
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// base64url -> ArrayBuffer (inverso de bufferABase64Url).
+function base64UrlABuffer(base64url) {
+  let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4 !== 0) base64 += '=';
+  const binario = atob(base64);
+  const bytes = new Uint8Array(binario.length);
+  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+  return bytes.buffer;
+}
+
+// Comprime un texto con deflate-raw y devuelve el ArrayBuffer resultante.
+// Función pura además de asíncrona: no toca el DOM ni el estado global,
+// testeable directamente desde Node (ver notas de verificación).
+async function comprimirTexto(texto) {
+  const stream = new Blob([texto]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return new Response(stream).arrayBuffer();
+}
+
+// Descomprime un ArrayBuffer/Uint8Array deflate-raw y devuelve el texto.
+async function descomprimirABuffer(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const buffer = await new Response(stream).arrayBuffer();
+  return new TextDecoder().decode(buffer);
+}
+
+// Serializa un estado de liga a base64url comprimido, listo para meter en el hash.
+async function comprimirEstadoABase64Url(estado) {
+  const buffer = await comprimirTexto(JSON.stringify(estado));
+  return bufferABase64Url(buffer);
+}
+
+// Inverso de comprimirEstadoABase64Url: de base64url a objeto de estado.
+async function descomprimirBase64UrlAEstado(base64url) {
+  const buffer = base64UrlABuffer(base64url);
+  const json = await descomprimirABuffer(buffer);
+  return JSON.parse(json);
+}
+
+function soportaCompressionStream() {
+  return typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
+}
+
+async function compartirEnlace() {
+  if (location.protocol === 'file:') {
+    mostrarModal(
+      `El enlace compartible solo funciona en la versión web publicada, no al abrir el archivo directamente. Usa ${URL_PUBLICA_LIGA} para compartir ligas por enlace.`,
+      () => {}
+    );
+    return;
+  }
+  if (!soportaCompressionStream()) {
+    mostrarModal('Este navegador no soporta la compresión necesaria para generar el enlace compartible.', () => {});
+    return;
+  }
+
+  const btn = document.getElementById('btn-compartir');
+  try {
+    const datos = await comprimirEstadoABase64Url(ligaState);
+    const url = `${location.origin}${location.pathname}#liga=${datos}`;
+    await navigator.clipboard.writeText(url);
+
+    const textoOriginal = btn.textContent;
+    btn.textContent = '¡Enlace copiado!';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }, 2000);
+  } catch (err) {
+    console.error('Error al generar el enlace compartible', err);
+    mostrarModal('No se ha podido generar el enlace compartible.', () => {});
+  }
+}
+
+// Al cargar la página con un hash "#liga=...": descomprime, valida con la
+// MISMA validación de forma que importarJSON, y pregunta antes de sustituir
+// el estado actual. El hash se limpia SIEMPRE (enlace válido o no, se acepte
+// o se cancele) para que un refresco de página no vuelva a disparar la
+// importación ni deje el enlace "colgado" en la barra de direcciones.
+async function manejarHashCompartido() {
+  const hash = location.hash;
+  if (!hash.startsWith('#liga=')) return;
+
+  const datosHash = hash.slice('#liga='.length);
+  const limpiarHash = () => history.replaceState(null, '', location.pathname + location.search);
+
+  let estado;
+  try {
+    estado = await descomprimirBase64UrlAEstado(datosHash);
+    if (!formaValidaLiga(estado)) throw new Error('forma invalida');
+  } catch (err) {
+    console.warn('Enlace de liga corrupto o inválido.', err);
+    limpiarHash();
+    mostrarModal('El enlace no contiene una liga válida; no se ha importado nada.', () => {});
+    return;
+  }
+
+  limpiarHash();
+  mostrarModal('¿Importar la liga del enlace? Sustituirá a la actual.', () => {
+    ligaState = estado;
+    guardarEstado();
+    render();
+  });
 }
 
 /* ============================================================
@@ -1073,6 +1205,7 @@ function init() {
   document.getElementById('btn-generar-liga').addEventListener('click', generarLiga);
   document.getElementById('loading-aceptar').addEventListener('click', ocultarGenerando);
   document.getElementById('btn-exportar').addEventListener('click', exportarJSON);
+  document.getElementById('btn-compartir').addEventListener('click', compartirEnlace);
   document.getElementById('btn-imagen-clasificacion').addEventListener('click', () => {
     const fecha = new Date().toISOString().slice(0, 10);
     capturarImagen(document.getElementById('clasificacion-capturable'), `clasificacion-padel-mutxo-${fecha}`);
@@ -1082,6 +1215,8 @@ function init() {
     if (file) importarJSON(file);
     e.target.value = '';
   });
+
+  manejarHashCompartido();
 }
 
 document.addEventListener('DOMContentLoaded', init);

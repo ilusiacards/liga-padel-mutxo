@@ -119,10 +119,12 @@ en `file://` el botón muestra el aviso de que el enlace necesita la versión we
 **Modelo:** Sonnet (diseño ya cerrado, ejecución acotada). **Paralelizable:** no
 (comparte `app.js`/`index.html` con las demás).
 
-- [ ] GitHub Pages activado y comprobado (la URL pública carga la app)
-- [ ] Fase 2 ejecutada
-- [ ] Diff revisado a mano por Fable
-- [ ] Verificada en navegador (criterios a–d)
+- [x] GitHub Pages activado y comprobado (la URL pública carga la app) — repo hecho
+      público (decisión del usuario 2026-08-28); https://ilusiacards.github.io/liga-padel-mutxo/ responde 200
+- [x] Fase 2 ejecutada
+- [x] Diff revisado a mano por Fable
+- [x] Verificada en navegador (criterios a–d; el portapapeles no es verificable en
+      headless — NotAllowedError por permisos, pendiente de comprobar en móvil real)
 
 ---
 
