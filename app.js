@@ -45,6 +45,14 @@ function estadoInicial() {
 let appState = { ligas: [], activaId: null };
 let ligaState = estadoInicial();
 
+// Modo consulta (Fase 4, enlaces #ver=): cuando es true, `ligaState` apunta
+// al estado descomprimido del enlace, SIN relación alguna con `appState` (el
+// contenedor cargado de localStorage se queda exactamente como estaba). Es
+// la variable que activa todas las salvaguardas de solo lectura: bloquea
+// guardarEstado() (ver más abajo) y hace que render()/crearInputSet()/
+// crearPartidoCard() no generen ningún camino de edición.
+let modoConsulta = false;
+
 function crearIdLiga() {
   let id;
   do {
@@ -101,6 +109,11 @@ function entradaActiva() {
 // entrada activa, así cualquier reasignación de `ligaState` seguida de
 // guardarEstado() queda persistida sin tocar el resto de ligas.
 function guardarEstado() {
+  // Salvaguarda central del modo consulta: pase lo que pase más arriba
+  // (colapsar una jornada, un listener que se escape, lo que sea), en modo
+  // consulta NUNCA se escribe en localStorage ni se toca `appState`. Es el
+  // único punto de escritura de toda la app, así que basta con cortarlo aquí.
+  if (modoConsulta) return;
   const entrada = entradaActiva();
   if (entrada) entrada.liga = ligaState;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
@@ -816,6 +829,14 @@ function ordenarClasificacion(stats) {
    ============================================================ */
 
 function render() {
+  // En modo consulta no se renderizan ni la barra de ligas ni la pestaña
+  // Jugadores: así los contenedores de inputs (inputs-girls/inputs-boys) y el
+  // <select> de ligas se quedan vacíos, sin generar ningún input editable.
+  if (modoConsulta) {
+    renderJornadas();
+    renderClasificacion();
+    return;
+  }
   renderSelectorLigas();
   renderJugadores();
   renderJornadas();
@@ -987,19 +1008,24 @@ function crearPartidoCard(partido) {
   }
   card.appendChild(setsGrid);
 
-  const acciones = document.createElement('div');
-  acciones.className = 'partido-acciones';
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-small btn-completar' + (partido.completado ? ' completado' : '');
-  btn.textContent = partido.completado ? 'Editar resultado' : 'Partido completado';
-  btn.addEventListener('click', () => {
-    partido.ganadorPareja = calcularGanadorPartido(partido);
-    partido.completado = true;
-    guardarEstado();
-    render();
-  });
-  acciones.appendChild(btn);
-  card.appendChild(acciones);
+  // Modo consulta: sin botón "Partido completado"/"Editar resultado" — no se
+  // crea en absoluto, así no hay ningún camino de edición que ocultar a
+  // medias (ni siquiera queda en el DOM deshabilitado).
+  if (!modoConsulta) {
+    const acciones = document.createElement('div');
+    acciones.className = 'partido-acciones';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-small btn-completar' + (partido.completado ? ' completado' : '');
+    btn.textContent = partido.completado ? 'Editar resultado' : 'Partido completado';
+    btn.addEventListener('click', () => {
+      partido.ganadorPareja = calcularGanadorPartido(partido);
+      partido.completado = true;
+      guardarEstado();
+      render();
+    });
+    acciones.appendChild(btn);
+    card.appendChild(acciones);
+  }
 
   return card;
 }
@@ -1011,6 +1037,12 @@ function crearInputSet(partido, setIdx, lado) {
   input.max = '7';
   input.className = 'input-set';
   input.value = partido.sets[setIdx][lado] ?? '';
+  // Modo consulta: input deshabilitado y sin listener — ni siquiera queda un
+  // camino de edición inerte a medias.
+  if (modoConsulta) {
+    input.disabled = true;
+    return input;
+  }
   input.addEventListener('input', (e) => {
     const valorCrudo = e.target.value;
     if (valorCrudo === '') {
@@ -1370,6 +1402,11 @@ function soportaCompressionStream() {
   return typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
 }
 
+// Compartir enlace (Fase 4): tras las comprobaciones de siempre (file://,
+// soporte de CompressionStream), en vez de generar directamente el enlace
+// editable se abre un modal para elegir entre "solo lectura" (#ver=) y
+// "copia completa editable" (#liga=, igual que la Fase 2). Ambos usan
+// exactamente el mismo payload comprimido — solo cambia el prefijo del hash.
 async function compartirEnlace() {
   if (location.protocol === 'file:') {
     mostrarModal(
@@ -1383,10 +1420,51 @@ async function compartirEnlace() {
     return;
   }
 
-  const btn = document.getElementById('btn-compartir');
   try {
     const datos = await comprimirEstadoABase64Url(ligaState);
-    const url = `${location.origin}${location.pathname}#liga=${datos}`;
+    mostrarModalCompartir(datos);
+  } catch (err) {
+    console.error('Error al generar el enlace compartible', err);
+    mostrarModal('No se ha podido generar el enlace compartible.', () => {});
+  }
+}
+
+// Modal de elección de tipo de enlace. Reutiliza el patrón de los demás
+// modales (overlay + listeners que se desenganchan al cerrar).
+function mostrarModalCompartir(datosBase64) {
+  const overlay = document.getElementById('modal-compartir-overlay');
+  const btnLectura = document.getElementById('btn-enlace-lectura');
+  const btnEditable = document.getElementById('btn-enlace-editable');
+  const btnCancelar = document.getElementById('modal-compartir-cancelar');
+
+  overlay.hidden = false;
+
+  const cerrar = () => {
+    overlay.hidden = true;
+    btnLectura.removeEventListener('click', onLectura);
+    btnEditable.removeEventListener('click', onEditable);
+    btnCancelar.removeEventListener('click', cerrar);
+  };
+  function onLectura() {
+    cerrar();
+    copiarEnlaceGenerado('ver', datosBase64);
+  }
+  function onEditable() {
+    cerrar();
+    copiarEnlaceGenerado('liga', datosBase64);
+  }
+
+  btnLectura.addEventListener('click', onLectura);
+  btnEditable.addEventListener('click', onEditable);
+  btnCancelar.addEventListener('click', cerrar);
+}
+
+// Copia al portapapeles el enlace ya generado (mismo payload, prefijo según
+// el tipo elegido) y da el mismo feedback visual de siempre en el botón.
+async function copiarEnlaceGenerado(prefijo, datosBase64) {
+  const btn = document.getElementById('btn-compartir');
+  try {
+    const url = `${location.origin}${location.pathname}#${prefijo}=${datosBase64}`;
     await navigator.clipboard.writeText(url);
 
     const textoOriginal = btn.textContent;
@@ -1397,18 +1475,23 @@ async function compartirEnlace() {
       btn.disabled = false;
     }, 2000);
   } catch (err) {
-    console.error('Error al generar el enlace compartible', err);
-    mostrarModal('No se ha podido generar el enlace compartible.', () => {});
+    console.error('Error al copiar el enlace compartible', err);
+    mostrarModal('No se ha podido copiar el enlace compartible.', () => {});
   }
 }
 
-// Al cargar la página con un hash "#liga=...": descomprime, valida con la
-// MISMA validación de forma que importarJSON, y pregunta antes de añadir la
-// liga del enlace a la lista (no sustituye a ninguna). El hash se limpia SIEMPRE (enlace válido o no, se acepte
-// o se cancele) para que un refresco de página no vuelva a disparar la
-// importación ni deje el enlace "colgado" en la barra de direcciones.
+// Al cargar la página con un hash "#liga=..." o "#ver=...": descomprime y
+// valida con la MISMA validación de forma que importarJSON. "#liga=" sigue
+// funcionando exactamente igual que en la Fase 2/3 (importa como liga nueva
+// tras confirmación). "#ver=" entra en modo consulta (ver manejarHashVer).
 async function manejarHashCompartido() {
   const hash = location.hash;
+
+  if (hash.startsWith('#ver=')) {
+    await manejarHashVer(hash.slice('#ver='.length));
+    return;
+  }
+
   if (!hash.startsWith('#liga=')) return;
 
   const datosHash = hash.slice('#liga='.length);
@@ -1429,6 +1512,41 @@ async function manejarHashCompartido() {
   mostrarModal('¿Importar la liga del enlace? Se añadirá como una liga nueva sin tocar las que ya tienes.', () => {
     crearLiga('Liga importada', estado);
   });
+}
+
+// "#ver=...": modo consulta. A diferencia de "#liga=" NO se pregunta nada,
+// NO se toca `appState` ni localStorage, y el hash NO se limpia (así
+// recargar la página o reenviar la URL tal cual sigue funcionando). Un
+// enlace corrupto recibe el MISMO tratamiento que un "#liga=" corrupto: aviso,
+// se limpia el hash y la app queda utilizable en su estado normal.
+async function manejarHashVer(datosHash) {
+  let estado;
+  try {
+    estado = await descomprimirBase64UrlAEstado(datosHash);
+    if (!formaValidaLiga(estado)) throw new Error('forma invalida');
+  } catch (err) {
+    console.warn('Enlace de solo lectura corrupto o inválido.', err);
+    history.replaceState(null, '', location.pathname + location.search);
+    mostrarModal('El enlace no contiene una liga válida; no se ha podido abrir.', () => {});
+    return;
+  }
+
+  modoConsulta = true;
+  ligaState = normalizarLiga(estado);
+  activarModoConsulta();
+}
+
+// Ajusta la UI para el modo consulta: banner visible, pestaña/sección
+// Jugadores y barra de ligas ocultas, pestaña activa inicial = Jornadas, y
+// vuelve a renderizar (ya con modoConsulta=true, así que render()/
+// crearInputSet()/crearPartidoCard() toman automáticamente el camino de
+// solo lectura).
+function activarModoConsulta() {
+  document.getElementById('banner-modo-consulta').hidden = false;
+  document.querySelector('.tab-btn[data-tab="jugadores"]').hidden = true;
+  document.getElementById('ligas-barra').hidden = true;
+  activarTab('jornadas');
+  render();
 }
 
 /* ============================================================

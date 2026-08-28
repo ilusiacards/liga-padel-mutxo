@@ -9,7 +9,7 @@
 <body>
   <header class="app-header">
     <h1>Liga Mutxo Padel</h1>
-    <div class="ligas-barra">
+    <div class="ligas-barra" id="ligas-barra">
       <select id="selector-liga" class="selector-liga" aria-label="Liga activa"></select>
       <div class="ligas-acciones">
         <button id="btn-liga-nueva" class="btn btn-secondary btn-mini">Nueva</button>
@@ -23,6 +23,8 @@
       <button class="tab-btn" data-tab="clasificacion">Clasificación</button>
     </nav>
   </header>
+
+  <p id="banner-modo-consulta" class="banner-modo-consulta" hidden>Modo consulta — liga compartida por enlace</p>
 
   <main class="app-main">
     <section id="tab-jugadores" class="tab-section active">
@@ -104,6 +106,19 @@
       <div class="modal-acciones">
         <button id="modal-texto-cancelar" class="btn btn-secondary">Cancelar</button>
         <button id="modal-texto-confirmar" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-compartir-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <p id="modal-compartir-mensaje">¿Qué tipo de enlace quieres generar?</p>
+      <div class="modal-compartir-opciones">
+        <button id="btn-enlace-lectura" class="btn btn-secondary">Solo lectura (para el grupo)</button>
+        <button id="btn-enlace-editable" class="btn btn-secondary">Copia completa (editable)</button>
+      </div>
+      <div class="modal-acciones">
+        <button id="modal-compartir-cancelar" class="btn btn-secondary">Cancelar</button>
       </div>
     </div>
   </div>

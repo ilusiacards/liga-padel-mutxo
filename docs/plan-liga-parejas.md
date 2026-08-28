@@ -219,9 +219,10 @@ backend): evita ediciones accidentales, no ediciones malintencionadas.
 **Modelo:** Sonnet (diseño cerrado; ojo en revisión a caminos de edición que se
 escapen). **Paralelizable:** no.
 
-- [ ] Fase 4 ejecutada
-- [ ] Diff revisado a mano por Fable (checklist de TODOS los controles de edición)
-- [ ] Verificada en navegador (criterios a–h)
+- [x] Fase 4 ejecutada
+- [x] Diff revisado a mano por Fable (checklist de TODOS los controles de edición;
+      salvaguarda central: guardarEstado() es no-op en modo consulta)
+- [x] Verificada en navegador (criterios a–h; capturas del modo consulta revisadas)
 
 ---
 

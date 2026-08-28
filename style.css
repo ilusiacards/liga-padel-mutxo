@@ -55,6 +55,10 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   margin-top: var(--space-2);
 }
 
+/* Oculta en modo consulta (Fase 4): vive en la cabecera, fuera de cualquier
+   pestaña, así que necesita su propio par [hidden]. */
+.ligas-barra[hidden] { display: none; }
+
 .selector-liga {
   flex: 1 1 140px;
   max-width: 240px;
@@ -109,6 +113,25 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   background: var(--secondary);
   color: var(--bg);
 }
+
+/* Oculta la pestaña Jugadores en modo consulta (Fase 4). */
+.tab-btn[hidden] { display: none; }
+
+/* Banner fijo de modo consulta (Fase 4), bajo la cabecera. */
+.banner-modo-consulta {
+  max-width: 960px;
+  margin: 0 auto var(--space-1);
+  padding: 10px var(--space-2);
+  background: var(--surface);
+  border: 1px solid var(--secondary);
+  border-radius: var(--radius-input);
+  color: var(--secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.banner-modo-consulta[hidden] { display: none; }
 
 .app-main {
   max-width: 960px;
@@ -486,6 +509,17 @@ h2 { font-size: 1.25rem; margin-bottom: var(--space-2); }
   outline: none;
   border-color: var(--secondary);
 }
+
+/* Modal de elección de tipo de enlace (Fase 4): reutiliza .modal-overlay/
+   .modal, así que ya hereda el par .modal-overlay[hidden] de arriba. */
+.modal-compartir-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.modal-compartir-opciones .btn { width: 100%; }
 
 /* Loading (generación de liga) */
 .loading-overlay {

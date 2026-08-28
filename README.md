@@ -50,19 +50,43 @@ Todas las ligas viven **solo en este navegador** (`localStorage`, clave `padel-l
 
 ## Compartir por enlace
 
-- El botón **Compartir enlace** (junto a Exportar/Importar Datos) genera una URL que
-  contiene la liga completa comprimida en el propio enlace (nada se sube a ningún
-  servidor) y la copia al portapapeles; el botón muestra brevemente "¡Enlace
-  copiado!" como confirmación.
-- Requiere la versión web publicada en
+El botón **Compartir enlace** (junto a Exportar/Importar Datos) abre un pequeño
+modal para elegir qué tipo de enlace generar. En ambos casos la liga completa
+viaja comprimida en el propio enlace (nada se sube a ningún servidor) y la URL
+se copia al portapapeles; el botón muestra brevemente "¡Enlace copiado!" como
+confirmación.
+
+- **Solo lectura (para el grupo)**: genera un enlace de **modo consulta**
+  (`#ver=...`). Quien lo abre puede ver las pestañas **Jornadas** y
+  **Clasificación** de esa liga, colapsar/expandir jornadas y usar "Sacar
+  imagen", pero no puede editar nada: no hay pestaña Jugadores, no hay
+  selector de ligas ni botones de Generar/Exportar/Importar/Compartir, y los
+  sets de los partidos aparecen deshabilitados. La liga del enlace se carga
+  solo en memoria — **no se guarda** en el navegador de quien lo abre, así que
+  sus propias ligas (si tiene) quedan completamente intactas. Recargar la
+  página o reenviar la misma URL sigue funcionando, porque el enlace no se
+  "consume": es este el pensado para compartir con todo el grupo.
+- **Copia completa (editable)**: genera el enlace de siempre (`#liga=...`).
+  Quien lo abre puede importar esa liga como una liga nueva y editarla con
+  total libertad, sin afectar a la del que comparte. Es una copia
+  independiente, pensada para un único destinatario que vaya a llevar su
+  propia versión de la liga.
+
+Ambos tipos de enlace:
+
+- Requieren la versión web publicada en
   [`https://ilusiacards.github.io/liga-padel-mutxo/`](https://ilusiacards.github.io/liga-padel-mutxo/):
   si abres `index.html` con doble clic (`file://`), el botón avisa de que hace falta
   esa versión web, porque un enlace `file://` no se puede compartir ni abrir en otro
   dispositivo.
-- El enlace contiene **solo la liga activa** en ese momento.
-- Al abrir un enlace compartido, la app pregunta si quieres importar esa liga; al
-  aceptar se añade como una liga nueva ("Liga importada") y no sustituye a ninguna
-  de las que ya tengas en ese navegador.
+- Contienen **solo la liga activa** en el momento de generarlos.
+- Un enlace corrupto o inválido (de cualquiera de los dos tipos) muestra un aviso
+  y no rompe nada: la app se queda en su estado normal.
+
+Al abrir un enlace `#liga=` (copia completa), la app pregunta si quieres
+importar esa liga; al aceptar se añade como una liga nueva ("Liga importada")
+y no sustituye a ninguna de las que ya tengas en ese navegador. Un enlace
+`#ver=` (solo lectura) no pregunta nada: entra directamente en modo consulta.
 
 ## Reiniciar desde cero
 
