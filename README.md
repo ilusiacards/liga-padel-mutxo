@@ -8,7 +8,7 @@ Haz doble clic en `index.html` (o ábrelo desde el navegador con `Archivo > Abri
 
 ## Instalar como app (PWA)
 
-Desde la URL pública (`https://ilusiacards.github.io/liga-padel-mutxo/`), el navegador
+Desde la URL pública (`https://mutxopadel.github.io/liga-padel-mutxo/`), el navegador
 ofrece **Añadir a pantalla de inicio** (móvil) o **Instalar** (icono en la barra de
 direcciones, escritorio). Una vez instalada funciona offline tras la primera visita:
 el propio navegador se encarga de guardar los ficheros de la app en caché. Los datos
@@ -19,14 +19,14 @@ instalar la app no cambia dónde se guardan ni cómo se comparten.
 
 Los jugadores no necesitan la app de gestión: tienen la suya, de solo lectura, en
 
-[`https://ilusiacards.github.io/liga-padel-mutxo/jugador/`](https://ilusiacards.github.io/liga-padel-mutxo/jugador/)
+[`https://mutxopadel.github.io/liga-padel-mutxo/jugador/`](https://mutxopadel.github.io/liga-padel-mutxo/jugador/)
 
 Esa es la URL que hay que pasarles. Desde ella el navegador ofrece **Añadir a
 pantalla de inicio** / **Instalar** igual que la app de gestión, y queda como una
 app aparte ("Liga Mutxo Padel") con su propio ámbito de instalación (distinto
 del de la app de gestión, así que las dos se pueden instalar a la vez sin que
 Android confunda una con otra). El enlace antiguo,
-`https://ilusiacards.github.io/liga-padel-mutxo/jugador.html`, sigue
+`https://mutxopadel.github.io/liga-padel-mutxo/jugador.html`, sigue
 funcionando: redirige automáticamente a `jugador/`.
 
 Qué ven: solo las pestañas **Jornadas** y **Clasificación**, con la ficha de cada
@@ -145,7 +145,7 @@ confirmación.
 Ambos tipos de enlace:
 
 - Requieren la versión web publicada en
-  [`https://ilusiacards.github.io/liga-padel-mutxo/`](https://ilusiacards.github.io/liga-padel-mutxo/):
+  [`https://mutxopadel.github.io/liga-padel-mutxo/`](https://mutxopadel.github.io/liga-padel-mutxo/):
   si abres `index.html` con doble clic (`file://`), el botón avisa de que hace falta
   esa versión web, porque un enlace `file://` no se puede compartir ni abrir en otro
   dispositivo.
