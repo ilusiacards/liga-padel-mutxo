@@ -1656,7 +1656,7 @@ function importarJSON(file) {
    navegador + base64url)
    ============================================================ */
 
-const URL_PUBLICA_LIGA = 'https://ilusiacards.github.io/liga-padel-mutxo/';
+const URL_PUBLICA_LIGA = 'https://mutxopadel.github.io/liga-padel-mutxo/';
 
 // ArrayBuffer -> base64url (sin '+', '/' ni '=', apto para un fragmento de URL).
 function bufferABase64Url(buffer) {
@@ -1796,7 +1796,7 @@ async function copiarEnlaceGenerado(prefijo, datosBase64) {
    ============================================================ */
 
 const TOKEN_STORAGE_KEY = 'padel-liga-mutxo-token';
-const GITHUB_API_LIGA_OFICIAL = 'https://api.github.com/repos/ilusiacards/liga-padel-mutxo/contents/liga-oficial.json';
+const GITHUB_API_LIGA_OFICIAL = 'https://api.github.com/repos/mutxopadel/liga-padel-mutxo/contents/liga-oficial.json';
 
 // Codifica un texto (JSON con acentos/ñ/emojis incluidos) a base64 de forma
 // segura para Unicode: TextEncoder → bytes → base64. btoa(texto) a pelo
